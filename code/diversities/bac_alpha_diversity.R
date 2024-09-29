@@ -48,9 +48,9 @@ for (cluster in sort(unique(nodes_bac$LouvainLabelD))){
 #Chao1 - Richness
 gg_chao_per_cluster <- ggplot(df_diversity, aes(fill=Color, y=Chao, x=as.integer(rownames(df_diversity)))) + 
   geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="Chao1 - Richness",title="Bacteria")+
+  labs(x="Louvain Cluster",y="Chao1 - Richness")+#,title="Bacteria"
   theme(legend.position="none")+
-  scale_x_continuous(breaks=seq(0,13,by=1))
+  scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
 gg_chao_per_cluster
@@ -63,9 +63,9 @@ ggsave(filename="Bac_Chao_per_cluster.png", plot=gg_chao_per_cluster, path=paste
 #Shannon Entropy
 gg_shannon_per_cluster <- ggplot(df_diversity, aes(fill=Color, y=Shannon, x=as.integer(rownames(df_diversity)))) + 
   geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="Shannon-Entropy",title="Bacteria")+
+  labs(x="Louvain Cluster",y="Shannon-Entropy")+#,title="Bacteria"
   theme(legend.position="none")+
-  scale_x_continuous(breaks=seq(0,13,by=1))
+  scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
 gg_shannon_per_cluster
@@ -78,9 +78,9 @@ ggsave(filename="Bac_Shannon_per_cluster.png", plot=gg_shannon_per_cluster, path
 #Simpson-Index
 gg_simpson_per_cluster <- ggplot(df_diversity, aes(fill=Color, y=Simpson, x=as.integer(rownames(df_diversity)))) + 
   geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="Simpson-Index",title="Bacteria")+
+  labs(x="Louvain Cluster",y="Simpson-Index")+#,title="Bacteria"
   theme(legend.position="none")+
-  scale_x_continuous(breaks=seq(0,13,by=1))
+  scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
 gg_simpson_per_cluster
@@ -93,9 +93,9 @@ ggsave(filename="Bac_Simpson_per_cluster.png", plot=gg_simpson_per_cluster, path
 #Number of ASvs
 gg_asv_per_cluster <- ggplot(nodes_bac, aes(fill=louvain_label_color, y=Abundance4y, x=LouvainLabelD)) + 
   geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="No of ASVs",title="Bacteria")+
+  labs(x="Louvain Cluster",y="No of ASVs")+#,title="Bacteria"
   theme(legend.position="none")+
-  scale_x_continuous(breaks=seq(0,13,by=1))
+  scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
 gg_asv_per_cluster
