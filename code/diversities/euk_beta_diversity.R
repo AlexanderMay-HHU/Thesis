@@ -1,13 +1,11 @@
 ## Loading Libraries
 library(dplyr)
 library(vegan)    #Used for Bray-Curtis Distance
-library(pheatmap) #Used to plot the Heatmap
-library(grid)     #Used to display Labels for Heatmap axis
-
+library(ggplot2)
 
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Project/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots"
+setwd("R:/Studium/Bachelor/Thesis/data")
+plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/Diversities/Eukaryota/"
 plot_name <- "Euk_beta_diversity.png"
 
 
@@ -46,19 +44,20 @@ for (cluster in sort(unique(nodes_euk$LouvainLabelD))){
 
 
 # Calculate Bray-Curtis dissimilarity
-bray_curtis_dist <- vegdist(abundance_of_phylum_in_cluster, method = "bray",na.rm = TRUE) %>% as.matrix() %>% as.data.frame()
-bc_for_ggplot <- expand.grid(From_Cluster=colnames(bray_curtis_dist),To_Cluster=rownames(bray_curtis_dist))
+bray_curtis_dist <- vegdist(abundance_of_phylum_in_cluster, method = "bray",na.rm = TRUE) %>% as.matrix() %>% as.table() %>% as.data.frame()
 
 
+heatmap <- ggplot(bray_curtis_dist, aes(x = rev(Var1), y = rev(Var2), fill = Freq, label = round(Freq,2))) +
+  geom_tile(color = "darkgray",lwd=1,linetype=1) + # Create heatmap
+  coord_fixed()+
+  geom_text(color = ifelse(bray_curtis_dist$Freq<=0.2 | bray_curtis_dist$Freq>=0.75 ,"white","black"), size = 4) + # Add text labels
+  guides(fill = guide_colorbar(title="", barwidth=1.5 , barheight=35))+ #Adjust Legend Height & Width
+  scale_fill_gradientn(colours = colorRampPalette(c("blue", 'white', 'red'))(100),breaks=c(seq(0,1,0.1)))+ # Set color gradient
+  theme_minimal() + # Set theme
+  labs(x = "Cluster", y = "Cluster", title = "") + # Labels
+  theme(axis.text.x = element_text(angle = 0, hjust = 1))# Rotate x-axis labels
 
 
-#Make Heatmap & save with x-y Axis labels
-png(paste(plot_path,"/Diversities/Eukaryota/",plot_name,sep=""),width=900,height=900)
-  setHook("grid.newpage", function() pushViewport(viewport(x=1,y=1,width=0.9, height=0.9, name="vp", just=c("right","top"))), action="prepend")
-  bray_heatmap <- pheatmap(bray_curtis_dist,angle_col= 0, display_numbers= TRUE, ,cluster_rows=FALSE, cluster_cols=FALSE,
-                           color = colorRampPalette(c("#3b4cc0", "#ffffff", "#F21A00"))(50),border_color = "#ffffff",number_color= "#303030",
-                           main="Bray-Curtis beta diversity of eukaryota between clusters")
-  setHook("grid.newpage", NULL, "replace")
-  grid.text("Cluster", y=-0.02, gp=gpar(fontsize=16))
-  grid.text("Cluster", x=-0.02, rot=90, gp=gpar(fontsize=16))
-dev.off()
+heatmap
+
+ggsave(plot_name,heatmap,path=plot_path)
