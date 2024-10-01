@@ -47,7 +47,7 @@ for (cluster in sort(unique(nodes_bac$LouvainLabelD))){
 bray_curtis_dist <- vegdist(abundance_of_phylum_in_cluster, method = "bray",na.rm = TRUE) %>% as.matrix() %>% as.table() %>% as.data.frame()
 
 
-heatmap <- ggplot(bray_curtis_dist, aes(x = rev(Var1), y = rev(Var2), fill = Freq, label = round(Freq,2))) +
+heatmap <- ggplot(bray_curtis_dist, aes(x = Var1, y = Var2, fill = Freq, label = round(Freq,2))) +
   geom_tile(color = "darkgray",lwd=1,linetype=1) + # Create heatmap
   coord_fixed()+
   geom_text(color = ifelse(bray_curtis_dist$Freq<=0.2 | bray_curtis_dist$Freq>=0.75 ,"white","black"), size = 4) + # Add text labels

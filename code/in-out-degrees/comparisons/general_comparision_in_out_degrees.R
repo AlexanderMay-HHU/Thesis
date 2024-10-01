@@ -4,7 +4,8 @@ library(ggplot2)
 
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots"
+plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/InOutDegrees/Comparisons"
+colorblind_palette <- palette.colors(palette = "Okabe-Ito")[c(4,7)]
 
 
 
@@ -84,26 +85,28 @@ colnames(in_out_deg) <- c("cluster", "interaction_type","count")
 stacked_number <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=cluster))+
                     geom_bar(position="stack", stat="identity")+
                     scale_x_continuous(breaks = c(0,2:13))+
-                    scale_fill_manual(values=c("#009900","#990000"))+
-                    labs(title="Interactions of each Cluster", y="Count",x="Cluster")+
+                    scale_fill_manual(values=colorblind_palette)+
+                    labs(title="", y="Count",x="Cluster")+
+                    guides(fill=guide_legend(title="Interaction\n.... cluster"))+
                     geom_text(aes(label=count), position = position_stack(vjust= 0.5), check_overlap = TRUE)
 
 stacked_number
 
 #Save to plot_path
-ggsave(filename="Comparision_general_in_out_degrees_count.png", plot=stacked_number, path=paste(plot_path,"/InOutDegrees/Comparisons/Count/",sep=""))
+ggsave(filename="Comparision_general_in_out_degrees_count.png", plot=stacked_number, path=paste(plot_path,"/Count/",sep=""))
 
 
 stacked_percent <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=cluster))+
                     geom_bar(position="fill", stat="identity")+
                     scale_x_continuous(breaks = c(0,2:13))+
                     scale_y_continuous(labels = scales::percent)+
-                    scale_fill_manual(values=c("#009900","#990000"))+
-                    labs(title="Interactions of each cluster",y="Distribution of in and outgoing interactions",
-                         x="Cluster")
+                    scale_fill_manual(values=colorblind_palette)+
+                    labs(title="",y="Distribution of in and outgoing interactions",
+                         x="Cluster")+
+                    guides(fill=guide_legend(title="Interaction\n.... cluster"))
 
 stacked_percent
 
 #Save to plot_path
-ggsave(filename="Comparision_general_in_out_degrees_percent.png", plot=stacked_percent, path=paste(plot_path,"/InOutDegrees/Comparisons/Percent/",sep=""))
+ggsave(filename="Comparision_general_in_out_degrees_percent.png", plot=stacked_percent, path=paste(plot_path,"/Percent/",sep=""))
 
