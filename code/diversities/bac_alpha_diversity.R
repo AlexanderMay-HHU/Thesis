@@ -8,6 +8,10 @@ library(fossil)   #used for Chao1 - Richness
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
 plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots"
+colorblind_gradient_palette <- c("#000000","#df536b","#61d04f","#2297e6",
+                                 "#9928e5","#ee9ced","#e69f00","#8ee6ff",
+                                 "#009e73","#f0e442","#0072b2","#d55e00",
+                                 "#999999")
 
 
 
@@ -21,10 +25,10 @@ nodes_bac <- subset(nodes,nodes$Kingdom == "Bacteria")
 
 
 ## Make Diversity dataframe
-df_diversity <- data.frame(matrix(ncol=4,nrow=length(unique(nodes_bac$LouvainLabelD))))
+df_diversity <- data.frame(matrix(ncol=5,nrow=length(unique(nodes_bac$LouvainLabelD))))
 rownames(df_diversity) <- sort(unique(nodes_bac$LouvainLabelD))
-colnames(df_diversity) <- c("Chao","Shannon","Simpson","Color")
-df_diversity[,"Color"] <- nodes_bac[match(sort(unique(nodes_bac$LouvainLabelD)),nodes_bac$LouvainLabelD),"louvain_label_color"]
+colnames(df_diversity) <- c("Chao","Shannon","Simpson","ASV_Count","Color")
+df_diversity[,"Color"] <- colorblind_gradient_palette
 
 
 
@@ -39,6 +43,8 @@ for (cluster in sort(unique(nodes_bac$LouvainLabelD))){
   df_diversity[cluster_fix,"Simpson"] <- diversity(nodes_bac[which(nodes_bac$LouvainLabelD == cluster),1],index="simpson")
   #Chao1 - Richness
   df_diversity[cluster_fix,"Chao"] <- chao1(nodes_bac[which(nodes_bac$LouvainLabelD == cluster),1],taxa.row=TRUE)
+  #Number of ASVs
+  df_diversity[cluster_fix,"ASV_Count"] <- sum(nodes_bac[which(nodes_bac$LouvainLabelD == cluster),1])
   
   cat("Done with calculating the alpha diversities of Cluster", cluster, "\n",sep="")
 }
@@ -46,9 +52,9 @@ for (cluster in sort(unique(nodes_bac$LouvainLabelD))){
 
 ## Generate Barplots
 #Chao1 - Richness
-gg_chao_per_cluster <- ggplot(df_diversity, aes(fill=Color, y=Chao, x=as.integer(rownames(df_diversity)))) + 
-  geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="Chao1 - Richness")+#,title="Bacteria"
+gg_chao_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)), y=Chao)) + 
+  geom_bar(stat="identity", fill=colorblind_gradient_palette)+
+  labs(x="Louvain Cluster",y="Chao1 - Richness")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
@@ -61,9 +67,9 @@ ggsave(filename="Bac_Chao_per_cluster.png", plot=gg_chao_per_cluster, path=paste
 
 
 #Shannon Entropy
-gg_shannon_per_cluster <- ggplot(df_diversity, aes(fill=Color, y=Shannon, x=as.integer(rownames(df_diversity)))) + 
-  geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="Shannon-Entropy")+#,title="Bacteria"
+gg_shannon_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)), y=Shannon)) + 
+  geom_bar(stat="identity", fill=colorblind_gradient_palette)+
+  labs(x="Louvain Cluster",y="Shannon-Entropy")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
@@ -76,9 +82,9 @@ ggsave(filename="Bac_Shannon_per_cluster.png", plot=gg_shannon_per_cluster, path
 
 
 #Simpson-Index
-gg_simpson_per_cluster <- ggplot(df_diversity, aes(fill=Color, y=Simpson, x=as.integer(rownames(df_diversity)))) + 
-  geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="Simpson-Index")+#,title="Bacteria"
+gg_simpson_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)), y=Simpson)) + 
+  geom_bar(stat="identity", fill=colorblind_gradient_palette)+
+  labs(x="Louvain Cluster",y="Simpson-Index")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
@@ -91,9 +97,9 @@ ggsave(filename="Bac_Simpson_per_cluster.png", plot=gg_simpson_per_cluster, path
 
 
 #Number of ASvs
-gg_asv_per_cluster <- ggplot(nodes_bac, aes(fill=louvain_label_color, y=Abundance4y, x=LouvainLabelD)) + 
-  geom_bar(stat="identity")+
-  labs(x="Louvain Cluster",y="No of ASVs")+#,title="Bacteria"
+gg_asv_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)), y=ASV_Count)) + 
+  geom_bar(stat="identity",fill=colorblind_gradient_palette)+
+  labs(x="Louvain Cluster",y="No of ASVs")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
