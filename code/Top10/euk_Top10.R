@@ -6,6 +6,9 @@ library(dplyr)
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
 plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots"
+colorblind_gradient_palette <- c("#df536b","#61d04f","#2297e6","#9928e5",
+                                 "#ee9ced","#e69f00","#8ee6ff","#009e73",
+                                 "#f0e442","#d55e00")
 
 
 
@@ -63,11 +66,11 @@ print(top10_genus)
 ##Generate Stacked Barplot
 #Family (This is going to be used)
 gg_top10_family <- ggplot(subset(nodes_euk,nodes_euk$Family %in% top10_family),
-                          aes(fill=Family, y=Abundance4y, x=LouvainLabelD)) + 
+                          aes(x=LouvainLabelD, y=Abundance4y, fill=Family)) + 
                           geom_bar(position="fill", stat="identity")+
-                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 families",
-                            title="Distribution of family for eukaryota in each Cluster")+
-                          scale_x_continuous(breaks=seq(0,13,by=1))
+                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 families")+ #title="Distribution of family for eukaryota in each Cluster"
+                          scale_x_continuous(breaks = c(0,2:13))+
+                          scale_fill_discrete(type=colorblind_gradient_palette)
 
 #Show it
 gg_top10_family
@@ -79,11 +82,11 @@ ggsave(filename="Top10_Euk_Family.png", plot=gg_top10_family, path=paste(plot_pa
 
 #Order
 gg_top10_order <- ggplot(subset(nodes_euk,nodes_euk$Order %in% top10_order),
-                          aes(fill=Order, y=Abundance4y, x=LouvainLabelD)) + 
+                          aes(x=LouvainLabelD, y=Abundance4y, fill=Order)) + 
                           geom_bar(position="fill", stat="identity")+
-                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 orders",
-                            title="Distribution of order for eukaryota in each Cluster")+
-                          scale_x_continuous(breaks=seq(0,13,by=1))
+                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 orders")+ #title="Distribution of order for eukaryota in each Cluster"
+                          scale_x_continuous(breaks = c(0,2:13))+
+                          scale_fill_discrete(type=colorblind_gradient_palette)
 
 #Show it
 gg_top10_order
@@ -95,11 +98,11 @@ ggsave(filename="Top10_Euk_Order.png", plot=gg_top10_order, path=paste(plot_path
 
 #Genus
 gg_top10_genus <- ggplot(subset(nodes_euk,nodes_euk$Genus %in% top10_genus),
-                          aes(fill=Genus, y=Abundance4y, x=LouvainLabelD)) + 
+                          aes(x=LouvainLabelD, y=Abundance4y, fill=Genus)) + 
                           geom_bar(position="fill", stat="identity")+
-                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 genera",
-                            title="Distribution of genus for eukaryota in each Cluster")+
-                          scale_x_continuous(breaks=seq(0,13,by=1))
+                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 genera")+ #title="Distribution of genus for eukaryota in each Cluster"
+                          scale_x_continuous(breaks = c(0,2:13))+
+                          scale_fill_discrete(type=colorblind_gradient_palette)
 
 #Show it
 gg_top10_genus
