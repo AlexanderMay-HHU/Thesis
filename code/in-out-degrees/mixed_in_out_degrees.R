@@ -7,6 +7,10 @@ setwd("R:/Studium/Bachelor/Thesis/data")
 plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots"
 plot_name_EukBac <- "EukBac_in_out_degrees.png"
 plot_name_BacEuk <- "BacEuk_in_out_degrees.png"
+colorblind_palette <- c("#000000","#df536b","#61d04f","#2297e6",
+                        "#9928e5","#ee9ced","#e69f00","#8ee6ff",
+                        "#009e73","#f0e442","#0072b2","#d55e00",
+                        "#999999")
 
 
 
@@ -55,19 +59,6 @@ bac_euk_edges_from_to_different <- bac_euk_edges[bac_euk_edges$from_clu != bac_e
 
 
 
-
-
-#Get Cluster Colors
-cluster_colors <- c()
-for (clu_col in c(0,2:max(nodes$LouvainLabelD))){
-  cluster_colors <- c(cluster_colors, nodes$ColorLabel[min(which(nodes$LouvainLabelD == clu_col))])
-  cat("Cluster ", clu_col, ": ", cluster_colors[if(clu_col!=0){clu_col}else{1}],"\n",sep="")
-}
-names(cluster_colors) <- as.character(sort(unique(nodes$LouvainLabelD)))
-cluster_colors
-
-
-
 ##Eukaryotes -> Bacteria
 #Calc number of In&Out Degrees
 out_deg <- c()
@@ -88,12 +79,9 @@ adjacencyData_euk_bac <- with(euk_bac_edges_from_to_different, table(from_clu, t
 
 
 ## Generate Chord Plot
-png(paste(plot_path,"/InOutDegrees/",plot_name_EukBac,sep=""),width=900,height=900)
-chord_plot <- chordDiagram(adjacencyData_euk_bac,grid.col=cluster_colors, transparency = 0.5)
+png(paste(plot_path,"/InOutDegrees/",plot_name_EukBac,sep=""), width=900, height=900, res=200)
+chord_plot <- chordDiagram(adjacencyData_euk_bac,grid.col=colorblind_palette, transparency = 0.5)
 dev.off()
-
-
-
 
 
 
@@ -117,7 +105,7 @@ adjacencyData_bac_euk <- with(bac_euk_edges_from_to_different, table(from_clu, t
 
 
 ## Generate Chord Plot
-png(paste(plot_path,"/InOutDegrees/",plot_name_BacEuk,sep=""),width=900,height=900)
-chord_plot <- chordDiagram(adjacencyData_bac_euk,grid.col=cluster_colors, transparency = 0.5)
+png(paste(plot_path,"/InOutDegrees/",plot_name_BacEuk,sep=""), width=900, height=900, res=200)
+chord_plot <- chordDiagram(adjacencyData_bac_euk,grid.col=colorblind_palette, transparency = 0.5)
 dev.off()
 
