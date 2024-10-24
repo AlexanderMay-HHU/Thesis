@@ -72,14 +72,15 @@ print(top10_genus)
 gg_top10_family <- ggplot(subset(nodes_bac,nodes_bac$Family %in% top10_family),
                           aes(x=LouvainLabelD, y=Abundance4y, fill=Family)) + 
                           geom_bar(position="fill", stat="identity")+
-                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 families")+ #title="Distribution of family for bacteria in each Cluster"
+                          labs(x="Louvain Cluster", y="% of total abundance of top 10 families")+
                           scale_x_continuous(breaks = c(0,2:13))+
+                          scale_y_continuous(labels = scales::label_percent(),breaks=seq(0,1,by=0.1))+
                           scale_fill_discrete(type=colorblind_palette)
 
 #Show it
 gg_top10_family
 #Save to plot_path
-ggsave(filename="Top10_Bac_Family.png", plot=gg_top10_family, path=paste(plot_path,"/Top10/",sep=""))
+ggsave(filename="Bac_Family.png", plot=gg_top10_family, path=paste(plot_path,"/Top10/",sep=""))
 
 
 
@@ -90,14 +91,15 @@ ggsave(filename="Top10_Bac_Family.png", plot=gg_top10_family, path=paste(plot_pa
 gg_top10_order <- ggplot(subset(nodes_bac,nodes_bac$Order %in% top10_order),
                           aes(x=LouvainLabelD, y=Abundance4y, fill=Order)) + 
                           geom_bar(position="fill", stat="identity")+
-                          labs(x="Louvain Cluster", y="fraction of total abundance of top 10 orders")+ #title="Distribution of order for bacteria in each Cluster"
+                          labs(x="Louvain Cluster", y="% of total abundance of top 10 orders")+
                           scale_x_continuous(breaks = c(0,2:13))+
+                          scale_y_continuous(labels = scales::label_percent(),breaks=seq(0,1,by=0.1))+
                           scale_fill_discrete(type=colorblind_palette)
 
 #Show it
 gg_top10_order
 #Save to plot_path
-ggsave(filename="Top10_Bac_Order.png", plot=gg_top10_order, path=paste(plot_path,"/Appendix/",sep=""))
+ggsave(filename="Bac_Order.png", plot=gg_top10_order, path=paste(plot_path,"/Appendix/Top10",sep=""))
 
 
 
@@ -106,11 +108,12 @@ ggsave(filename="Top10_Bac_Order.png", plot=gg_top10_order, path=paste(plot_path
 gg_top10_genus <- ggplot(subset(nodes_bac,nodes_bac$Genus %in% top10_genus),
                         aes(x=LouvainLabelD, y=Abundance4y, fill=Genus)) + 
                         geom_bar(position="fill", stat="identity")+
-                        labs(x="Louvain Cluster", y="fraction of total abundance of top 10 genera")+ # title="Distribution of genus for bacteria in each Cluster"
+                        labs(x="Louvain Cluster", y="% of total abundance of top 10 genera")+
                         scale_x_continuous(breaks = c(0,2:13))+
+                        scale_y_continuous(labels = scales::label_percent(),breaks=seq(0,1,by=0.1))+
                         scale_fill_discrete(type=colorblind_palette)
 
 #Show it
 gg_top10_genus
 #Save to plot_path
-ggsave(filename="Top10_Bac_Genus.png", plot=gg_top10_genus, path=paste(plot_path,"/Appendix/",sep=""))
+ggsave(filename="Bac_Genus.png", plot=gg_top10_genus, path=paste(plot_path,"/Appendix/Top10",sep=""))

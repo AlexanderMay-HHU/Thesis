@@ -93,20 +93,20 @@ stacked_number <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=clust
   geom_bar(position="stack", stat="identity")+
   scale_x_continuous(breaks = c(0,2:13))+
   scale_fill_manual(values=colorblind_palette)+
-  labs(title="", y="Count",x="Cluster")+
+  labs(title="", y="Interactions",x="Cluster")+
   guides(fill=guide_legend(title="Interaction\n.... cluster"))+
   geom_text(aes(label=count), position = position_stack(vjust= 0.5), check_overlap = TRUE)
 
 stacked_number
 
 #Save to plot_path
-ggsave(filename="Comparision_bac_euk_in_out_degrees_count.png", plot=stacked_number, path=paste(plot_path,"/Count/",sep=""))
+ggsave(filename="Bac_Euk.png", plot=stacked_number, path=paste(plot_path,"/Count/",sep=""))
 
 
 stacked_percent <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=cluster))+
   geom_bar(position="fill", stat="identity")+
   scale_x_continuous(breaks = c(0,2:13))+
-  scale_y_continuous(labels = scales::percent)+
+  scale_y_continuous(labels = scales::percent, breaks=seq(0,1,by=0.1))+
   scale_fill_manual(values=colorblind_palette)+
   labs(title="",y="Distribution of in and outgoing interactions",
        x="Cluster")+
@@ -115,5 +115,5 @@ stacked_percent <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=clus
 stacked_percent
 
 #Save to plot_path
-ggsave(filename="Comparision_bac_euk_in_out_degrees_percent.png", plot=stacked_percent, path=paste(plot_path,"/Percent/",sep=""))
+ggsave(filename="Bac_Euk.png", plot=stacked_percent, path=paste(plot_path,"/Percent/",sep=""))
 

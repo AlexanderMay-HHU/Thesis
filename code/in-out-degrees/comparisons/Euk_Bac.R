@@ -44,29 +44,34 @@ for (interaction in 1:(length(edges$name))){
 
 
 
-#Only get interactions between different clusters
-edges_from_to_different <- edges[edges$from_clu != edges$to_clu,]
+#Split edges into different mixed interactions
+euk_bac_edges <- edges[edges$interaction_type == "EukBac",]
+bac_euk_edges <- edges[edges$interaction_type == "BacEuk",]
 
+
+#Only get interactions between different clusters
+euk_bac_edges_from_to_different <- euk_bac_edges[euk_bac_edges$from_clu != euk_bac_edges$to_clu,]
 
 
 #Number of interactions of each ASV (Not used currently)
-out_interactions_per_asv <- data.frame(table(edges_from_to_different$from_ASV))
-in_interactions_per_asv <- data.frame(table(edges_from_to_different$to_ASV))
+euk_bac_out_interactions_per_asv <- data.frame(table(euk_bac_edges_from_to_different$from_ASV))
+euk_bac_in_interactions_per_asv <- data.frame(table(euk_bac_edges_from_to_different$to_ASV))
 
 
 #Number of interactions to different clusters
 out_deg <- c()
 in_deg <- c()
-for (clu in 0:(max(edges_from_to_different$from_clu))){
+for (clu in 0:(max(euk_bac_edges_from_to_different$from_clu))){
   if(clu != 1){
-    out_deg <- c(out_deg, length(edges_from_to_different[edges_from_to_different$from_clu == clu,9]))
-    in_deg <- c(in_deg, length(edges_from_to_different[edges_from_to_different$to_clu == clu,2]))
+    out_deg <- c(out_deg, length(euk_bac_edges_from_to_different[euk_bac_edges_from_to_different$from_clu == clu,9]))
+    in_deg <- c(in_deg, length(euk_bac_edges_from_to_different[euk_bac_edges_from_to_different$to_clu == clu,2]))
     #cat(in_deg[if(clu!=0){clu}else{1}], " -> Cluster", clu, " -> ",
     #    out_deg[if(clu!=0){clu}else{1}], "\n",sep="")
   }else{
     next
   }
 }
+
 
 
 #get Data into Format
@@ -83,30 +88,30 @@ colnames(in_out_deg) <- c("cluster", "interaction_type","count")
 
 ## generate Plots
 stacked_number <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=cluster))+
-                    geom_bar(position="stack", stat="identity")+
-                    scale_x_continuous(breaks = c(0,2:13))+
-                    scale_fill_manual(values=colorblind_palette)+
-                    labs(title="", y="Count",x="Cluster")+
-                    guides(fill=guide_legend(title="Interaction\n.... cluster"))+
-                    geom_text(aes(label=count), position = position_stack(vjust= 0.5), check_overlap = TRUE)
+  geom_bar(position="stack", stat="identity")+
+  scale_x_continuous(breaks = c(0,2:13))+
+  scale_fill_manual(values=colorblind_palette)+
+  labs(title="", y="Interactions",x="Cluster")+
+  guides(fill=guide_legend(title="Interaction\n.... cluster"))+
+  geom_text(aes(label=count), position = position_stack(vjust= 0.5), check_overlap = TRUE)
 
 stacked_number
 
 #Save to plot_path
-ggsave(filename="Comparision_general_in_out_degrees_count.png", plot=stacked_number, path=paste(plot_path,"/Count/",sep=""))
+ggsave(filename="Euk_Bac.png", plot=stacked_number, path=paste(plot_path,"/Count/",sep=""))
 
 
 stacked_percent <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=cluster))+
-                    geom_bar(position="fill", stat="identity")+
-                    scale_x_continuous(breaks = c(0,2:13))+
-                    scale_y_continuous(labels = scales::percent)+
-                    scale_fill_manual(values=colorblind_palette)+
-                    labs(title="",y="Distribution of in and outgoing interactions",
-                         x="Cluster")+
-                    guides(fill=guide_legend(title="Interaction\n.... cluster"))
+  geom_bar(position="fill", stat="identity")+
+  scale_x_continuous(breaks = c(0,2:13))+
+  scale_y_continuous(labels = scales::percent, breaks=seq(0,1,by=0.1))+
+  scale_fill_manual(values=colorblind_palette)+
+  labs(title="",y="Distribution of in and outgoing interactions",
+       x="Cluster")+
+  guides(fill=guide_legend(title="Interaction\n.... cluster"))
 
 stacked_percent
 
 #Save to plot_path
-ggsave(filename="Comparision_general_in_out_degrees_percent.png", plot=stacked_percent, path=paste(plot_path,"/Percent/",sep=""))
+ggsave(filename="Euk_Bac.png", plot=stacked_percent, path=paste(plot_path,"/Percent/",sep=""))
 
