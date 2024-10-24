@@ -6,7 +6,7 @@ library(fossil)   #used for Chao1 - Richness
 
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots"
+plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/Diversities/Eukaryota/Alpha_diversity"
 colorblind_gradient_palette <- c("#000000","#df536b","#61d04f","#2297e6",
                                 "#9928e5","#ee9ced","#e69f00","#8ee6ff",
                                 "#009e73","#f0e442","#0072b2","#d55e00",
@@ -58,7 +58,7 @@ gg_chao_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversi
 #Show it
 gg_chao_per_cluster
 #Save to plot_path
-ggsave(filename="Euk_Chao_per_cluster.png", plot=gg_chao_per_cluster, path=paste(plot_path,"/Diversities/Eukaryota",sep=""))
+ggsave(filename="Chao.png", plot=gg_chao_per_cluster, path=plot_path)
 
 
 
@@ -73,7 +73,7 @@ gg_shannon_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_dive
 #Show it
 gg_shannon_per_cluster
 #Save to plot_path
-ggsave(filename="Euk_Shannon_per_cluster.png", plot=gg_shannon_per_cluster, path=paste(plot_path,"/Diversities/Eukaryota",sep=""))
+ggsave(filename="Shannon.png", plot=gg_shannon_per_cluster, path=plot_path)
 
 
 
@@ -88,7 +88,7 @@ gg_simpson_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_dive
 #Show it
 gg_simpson_per_cluster
 #Save to plot_path
-ggsave(filename="Euk_Simpson_per_cluster.png", plot=gg_simpson_per_cluster, path=paste(plot_path,"/Diversities/Eukaryota",sep=""))
+ggsave(filename="Simpson.png", plot=gg_simpson_per_cluster, path=plot_path)
 
 
 
@@ -96,11 +96,11 @@ ggsave(filename="Euk_Simpson_per_cluster.png", plot=gg_simpson_per_cluster, path
 #Number of ASvs
 gg_asv_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)), y=ASV_Count)) + 
   geom_bar(stat="identity",fill=colorblind_gradient_palette)+
-  labs(x="Louvain Cluster",y="No of ASVs")+
+  labs(x="Louvain Cluster",y="ASVs")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
 gg_asv_per_cluster
 #Save to plot_path
-ggsave(filename="Euk_ASV_per_cluster.png", plot=gg_asv_per_cluster, path=paste(plot_path,"/Overview",sep=""))
+ggsave(filename="Euk_ASV_Count.png", plot=gg_asv_per_cluster, path="R:/Studium/Bachelor/Thesis/generated_plots/Overview")

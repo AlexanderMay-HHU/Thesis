@@ -5,8 +5,8 @@ library(circlize)
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
 plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots"
-plot_name_EukBac <- "EukBac_in_out_degrees.png"
-plot_name_BacEuk <- "BacEuk_in_out_degrees.png"
+plot_name_EukBac <- "Euk_Bac.png"
+plot_name_BacEuk <- "Bac_Euk.png"
 colorblind_palette <- c("#000000","#df536b","#61d04f","#2297e6",
                         "#9928e5","#ee9ced","#e69f00","#8ee6ff",
                         "#009e73","#f0e442","#0072b2","#d55e00",

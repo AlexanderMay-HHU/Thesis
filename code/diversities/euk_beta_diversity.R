@@ -5,8 +5,8 @@ library(ggplot2)
 
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/Diversities/Eukaryota/"
-plot_name <- "Euk_beta_diversity.png"
+plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/Diversities/Eukaryota/Beta_diversity"
+plot_name <- "Bray_Curtis.png"
 colorblind_gradient_palette <- hcl.colors(palette = "Blue-Red",n=100)
 
 
