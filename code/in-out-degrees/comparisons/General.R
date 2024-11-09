@@ -1,5 +1,7 @@
 ##Loading Libraries
 library(ggplot2)
+library(dplyr)
+library(tidyr)
 
 
 #Set Working Directory
@@ -9,86 +11,54 @@ colorblind_palette <- palette.colors(palette = "Okabe-Ito")[c(4,7)]
 
 
 
-nodes <- read.csv("ferret_tables_Pruned_CCMN.csv_1 default node.csv", header=TRUE)
-#Replace Environment_Condition with NA
-nodes[nodes == "Environment_Condition"] <- NA
-
 edges <- read.csv("ferret_tables_Pruned_CCMN.csv_1 default edge.csv", header=TRUE)
 
 
-
-#Get Interacting ASVs
-for (interaction in 1:(length(edges$name))){
-  #print(edges$name[interaction])
-  edges$from_ASV[interaction] <- substring(edges$name[interaction],1,12)
-  edges$to_ASV[interaction] <- substring(edges$name[interaction],31,42)
-}
-
-
-#Get different Interaction Types
-for (interaction in 1:(length(edges$name))){
-  switch(paste(substring(edges$from_ASV[interaction],1,3),"",substring(edges$to_ASV[interaction],1,3),sep=""),
-         ArcArc={edges$interaction_type[interaction] <- "Euk"},
-         ArcEuk={edges$interaction_type[interaction] <- "Euk"},
-         ArcBac={edges$interaction_type[interaction] <- "BacEuk"},
-         
-         EukEuk={edges$interaction_type[interaction] <- "Euk"},
-         EukArc={edges$interaction_type[interaction] <- "Euk"},
-         EukBac={edges$interaction_type[interaction] <- "EukBac"},
-         
-         BacBac={edges$interaction_type[interaction] <- "Bac"},
-         BacArc={edges$interaction_type[interaction] <- "BacEuk"},
-         BacEuk={edges$interaction_type[interaction] <- "BacEuk"},
-  )
-}
-
-
+# declutter name of edges into from and to ASVs
+edges <- edges %>% mutate(from_ASV = substring(name,1,12), to_ASV = substring(name,31,42))
 
 #Only get interactions between different clusters
 edges_from_to_different <- edges[edges$from_clu != edges$to_clu,]
 
 
 
-#Number of interactions of each ASV (Not used currently)
-out_interactions_per_asv <- data.frame(table(edges_from_to_different$from_ASV))
-in_interactions_per_asv <- data.frame(table(edges_from_to_different$to_ASV))
+## (Not used currently)
+# Number of interactions of each ASV
+#out_interactions_per_asv <- data.frame(table(edges_from_to_different$from_ASV))
+#in_interactions_per_asv <- data.frame(table(edges_from_to_different$to_ASV))
 
 
-#Number of interactions to different clusters
-out_deg <- c()
-in_deg <- c()
-for (clu in 0:(max(edges_from_to_different$from_clu))){
-  if(clu != 1){
-    out_deg <- c(out_deg, length(edges_from_to_different[edges_from_to_different$from_clu == clu,9]))
-    in_deg <- c(in_deg, length(edges_from_to_different[edges_from_to_different$to_clu == clu,2]))
-    #cat(in_deg[if(clu!=0){clu}else{1}], " -> Cluster", clu, " -> ",
-    #    out_deg[if(clu!=0){clu}else{1}], "\n",sep="")
-  }else{
-    next
-  }
-}
 
+## Number of interactions from/to different clusters
+# Make adjacency matrix
+adjacencyData <- with(edges_from_to_different, table(from_clu, to_clu)) %>% as.data.frame()
+adjacencyData <- adjacencyData %>% pivot_wider(names_from =from_clu ,values_from = Freq)
+adjacencyData$to_clu <- NULL
+# Get In and Out Interactions
+in_deg <- apply(adjacencyData,1,sum)
+out_deg <- unname(apply(adjacencyData,2,sum))
 
-#get Data into Format
+#Get data into format
 cluster <- c(0,2:13)
 type <- c(rep("to",13),rep("from",13))
 count <- c(in_deg,out_deg)
 
-in_out_deg <- data.frame(cluster,type,count)
-colnames(in_out_deg) <- c("cluster", "interaction_type","count")
+in_out_deg <- data.frame(type,cluster,count)
+colnames(in_out_deg) <- c("interaction_type", "cluster", "count")
 
 
 
-
-
-## generate Plots
-stacked_number <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=cluster))+
-                    geom_bar(position="stack", stat="identity")+
-                    scale_x_continuous(breaks = c(0,2:13))+
-                    scale_fill_manual(values=colorblind_palette)+
-                    labs(title="", y="Interactions",x="Cluster")+
-                    guides(fill=guide_legend(title="Interaction\n.... cluster"))+
-                    geom_text(aes(label=count), position = position_stack(vjust= 0.5), check_overlap = TRUE)
+## Generate Plots
+stacked_number <- ggplot(in_out_deg, aes(fill=interaction_type,
+                                         y=count,
+                                         x=cluster))+
+  geom_bar(position="dodge", stat="identity")+
+  scale_x_continuous(breaks = c(0,2:13))+
+  scale_y_continuous(breaks=seq(0,300,25))+
+  scale_fill_manual(values=colorblind_palette)+
+  labs(title="", y="Interactions",x="Cluster")+
+  guides(fill=guide_legend(title="Interaction\n.... cluster"))#+
+  #geom_text(aes(label=count), position = position_dodge(width= 0.9), check_overlap = TRUE)
 
 stacked_number
 
@@ -96,17 +66,17 @@ stacked_number
 ggsave(filename="General.png", plot=stacked_number, path=paste(plot_path,"/Count/",sep=""))
 
 
-stacked_percent <- ggplot(in_out_deg, aes(fill=interaction_type, y=count, x=cluster))+
-                    geom_bar(position="fill", stat="identity")+
-                    scale_x_continuous(breaks = c(0,2:13))+
-                    scale_y_continuous(labels = scales::percent, breaks=seq(0,1,by=0.1))+
-                    scale_fill_manual(values=colorblind_palette)+
-                    labs(title="",y="Distribution of in and outgoing interactions",
-                         x="Cluster")+
-                    guides(fill=guide_legend(title="Interaction\n.... cluster"))
+stacked_percent <- ggplot(in_out_deg, aes(fill=interaction_type,
+                                          y=count,
+                                          x=cluster))+
+  geom_bar(position="fill", stat="identity")+
+  scale_x_continuous(breaks = c(0,2:13))+
+  scale_y_continuous(labels = scales::percent, breaks=seq(0,1,by=0.1))+
+  scale_fill_manual(values=colorblind_palette)+
+  labs(title="",y="Distribution of in and outgoing interactions",x="Cluster")+
+  guides(fill=guide_legend(title="Interaction\n.... cluster"))
 
 stacked_percent
 
 #Save to plot_path
 ggsave(filename="General.png", plot=stacked_percent, path=paste(plot_path,"/Percent/",sep=""))
-
