@@ -19,8 +19,8 @@ edge_list <- edges %>% select(name) %>%
 edge_graph <- graph_from_edgelist(edge_list,directed=T)
 
 ## Calculate betweenness & closeness centrality
-betweenness <- betweenness(edge_graph, directed = T, normalized = T)
-closeness <- closeness(edge_graph, mode= "total", normalized = T)
+betweenness <- betweenness(edge_graph, directed = T, normalized = F)
+closeness <- closeness(edge_graph, mode= "total", normalized = F)
 
 
 ## Put centrality measures into dataframe
