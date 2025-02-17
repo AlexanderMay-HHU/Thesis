@@ -27,7 +27,7 @@ nodes_arc_noUnknown_family <- nodes_arc_noUnknown_family[nodes_arc_noUnknown_fam
 
 
 # Cluster Size comparison
-arc_cluster <- nodes_arc %>% group_by(LouvainLabelD) %>% summarise(ASVs = n_distinct(Sequence), Abundance = sum(Abundance4y))
+arc_cluster <- nodes_arc_noUnknown_family %>% group_by(LouvainLabelD) %>% summarise(ASVs = n_distinct(Sequence), Abundance = sum(Abundance4y))
 
 
 # How many Unique Families are there?
@@ -87,7 +87,7 @@ gg_arc_clustersize <- ggplot(arc_cluster,
        title= "Archaea Clustersize Comparison")+
   theme(legend.key.size = unit(0.65, units = "cm"), legend.position="none")+ #Legend size adjustments removing legend here
   scale_x_continuous(breaks = c(0,2:13))+
-  scale_y_continuous(limits = c(0,7000))+
+  scale_y_continuous(limits = c(0,max(arc_cluster$Abundance)*1.2))+
   scale_fill_manual(values=colorblind_palette)+
   geom_text(inherit.aes = T,size = 4,position = position_dodge(0.9),vjust=-0.25)
                 
@@ -95,7 +95,7 @@ gg_arc_clustersize <- ggplot(arc_cluster,
 # Show it
 gg_arc_clustersize
 # Save to plot_path
-ggsave(filename="ClusterSize.png", plot=gg_arc_clustersize, path=paste(plot_path,"/02_Top/Archaea",sep=""))
+ggsave(filename="ClusterSize.png", plot=gg_arc_clustersize, path=paste(plot_path,"/00_Appendix/02_Top/Archaea",sep=""))
 
 
 
@@ -110,9 +110,11 @@ gg_family_overall <- ggplot(arc_family_overall,
   labs(x="Family",y="% of total identifies archaea ASVs",
        title = "Archaea families overall")+ # Axis labels
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-  scale_y_continuous(labels = scales::label_percent(suffix=""),breaks=seq(0,1,by=0.1))+#Y-Axis values
+  scale_y_continuous(labels = scales::label_percent(suffix=""),
+                     breaks=seq(0,1,by=0.1),
+                     limits = c(0,max(arc_family_overall$Freq*1.2)))+#Y-Axis values
   theme(legend.key.size = unit(0.65, units = "cm"), legend.position="none")+ #Legend size adjustments removing legend here
-  geom_text(inherit.aes = T,size = 4,position = position_dodge(0.9),vjust=0.5) #Barplot text value
+  geom_text(inherit.aes = T,size = 4,position = position_dodge(0.9),vjust=-0.25) #Barplot text value
 
 # Show it
 gg_family_overall
@@ -148,7 +150,7 @@ gg_top_family <- ggplot(arc_family,
 #Show it
 gg_top_family
 #Save to plot_path
-ggsave(filename="Family_Cluster_Percentage.png", plot=gg_top_family, path=paste(plot_path,"/02_Top/Archaea/",sep=""))
+ggsave(filename="Family_Cluster_Percentage.png", plot=gg_top_family, path=paste(plot_path,"/00_Appendix/02_Top/Archaea/",sep=""))
 
 
 
@@ -159,7 +161,7 @@ gg_top_family_numbers <- gg_top_family+
 #Show it
 gg_top_family_numbers
 #Save to plot_path
-ggsave(filename="Family_Cluster_Percentage_Numbers.png", plot=gg_top_family_numbers, path=paste(plot_path,"/02_Top/Archaea/",sep=""))
+ggsave(filename="Family_Cluster_Percentage_Numbers.png", plot=gg_top_family_numbers, path=paste(plot_path,"/00_Appendix/02_Top/Archaea/",sep=""))
 
 
 
@@ -184,9 +186,17 @@ gg_top_family_abundance <- ggplot(arc_family,
   geom_vline(aes(xintercept=c(12)+0.5))+
   labs(x="Louvain Cluster", y="total abundance of top identified families",
        title= "Archaea Families")+
+  theme(legend.key.size = unit(0.65, units = "cm"), legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))+
   scale_fill_discrete(type=colorblind_palette[0:-1])
 #Show it
 gg_top_family_abundance
 #Save to plot_path
-ggsave(filename="Family_Cluster_Abundance.png", plot=gg_top_family_abundance, path=paste(plot_path,"/02_Top/Archaea",sep=""))
+ggsave(filename="Family_Cluster_Abundance.png", plot=gg_top_family_abundance + theme(legend.position="right"), path=paste(plot_path,"/00_Appendix/02_Top/Archaea",sep=""))
+
+
+
+# Combined Cluster Plots
+combined_plots <- gg_top_family_abundance | gg_top_family
+combined_plots + plot_annotation(tag_levels = 'A')
+ggsave(filename="Family_Clsuter_Combined.png", plot=combined_plots, path=paste(plot_path,"/02_Top/Archaea",sep=""))
