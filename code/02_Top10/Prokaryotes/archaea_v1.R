@@ -21,9 +21,9 @@ nodes_arc <- subset(nodes,nodes$Kingdom == "Archaea")
 
 
 #How many Unique of XY are there?
-cat("Genus:",length(unique(nodes_arc$Genus)))
-cat("Family:",length(unique(nodes_arc$Family)))
-cat("Order:",length(unique(nodes_arc$Order)))
+cat("There are # different\n","Genera:",length(unique(nodes_arc$Genus)),"\n\t",
+    "Families:",length(unique(nodes_arc$Family)),"\n\t\t",
+    "Orders:",length(unique(nodes_arc$Order)),"\n")
 
 
 
@@ -68,11 +68,13 @@ head(c(tail(abundance_genus %>% arrange(sum_genus),10)$names_genus)) #Only NA
 
 
 
-
 ##Generate Stacked Barplot
 #Family (This is going to be used)
 gg_top5_family <- ggplot(subset(nodes_arc,nodes_arc$Family %in% top5_family),
-                          aes(x=LouvainLabelD, y=Abundance4y, fill=Family)) + 
+                          aes(x=LouvainLabelD,
+                              y=Abundance4y,
+                              fill=Family,
+                              label = n_distinct(Family))) + 
                         geom_bar(position="fill", stat="identity")+
                         geom_vline(aes(xintercept=c(0)+0.5))+
                         geom_vline(aes(xintercept=c(1)+0.5))+
@@ -89,6 +91,7 @@ gg_top5_family <- ggplot(subset(nodes_arc,nodes_arc$Family %in% top5_family),
                         geom_vline(aes(xintercept=c(12)+0.5))+
                         labs(x="Louvain Cluster", y="% of total abundance of top 5 families",
                              title= "Archaea Families")+
+                        geom_text(size = 3, position = position_stack(vjust = 0.5))+
                         scale_x_continuous(breaks = c(0,2:13))+
                         scale_y_continuous(labels = scales::label_percent(),breaks=seq(0,1,by=0.1))+
                         scale_fill_discrete(type=colorblind_palette)
