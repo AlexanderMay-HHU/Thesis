@@ -53,7 +53,7 @@ euk_family_overall <- euk_family_overall %>% mutate(Freq = total_Abundance/sum(t
 euk_family_overall <- euk_family_overall %>% arrange(total_Abundance)
 
 # Top 10 Overall only
-euk_family_top10_overall <- tail(euk_family_overall,11)
+euk_family_top10_overall <- tail(euk_family_overall,10)
 euk_family_top10_overall <- euk_family_top10_overall %>% mutate(Freq = total_Abundance/sum(total_Abundance))
 
 
@@ -61,16 +61,16 @@ euk_family_top10_overall <- euk_family_top10_overall %>% mutate(Freq = total_Abu
 euk_family_top10 <- subset(nodes_euk_noUnknown_family, nodes_euk_noUnknown_family$Family %in% euk_family_top10_overall$Family)
 euk_family_top10 <- euk_family_top10 %>% group_by(Family,LouvainLabelD) %>% summarize(Abundance = sum(Abundance4y))
 euk_family_top10 <- euk_family_top10 %>% group_by(LouvainLabelD) %>% mutate(FreqInCluster = Abundance/sum(Abundance))
-euk_family_top10 <- euk_family_top10 %>% arrange(LouvainLabelD)
+euk_family_top10 <- euk_family_top10 %>% arrange(LouvainLabelD,FreqInCluster)
 euk_family_top10
 
 
 # Anteile
 sum(nodes_euk$Abundance4y)
 sum(nodes_euk_noUnknown_family$Abundance4y)
-sum(euk_family_overall$total_Abundance)
+sum(euk_family_top10_overall$total_Abundance)
 
-sum(euk_family_overall$total_Abundance)/sum(nodes_euk$Abundance4y)
+sum(euk_family_top10_overall$total_Abundance)/sum(nodes_euk$Abundance4y)
 
 
 
@@ -96,8 +96,7 @@ gg_euk_clustersize <- ggplot(euk_cluster,
   geom_vline(aes(xintercept=c(10)+0.5))+
   geom_vline(aes(xintercept=c(11)+0.5))+
   geom_vline(aes(xintercept=c(12)+0.5))+
-  labs(x="Louvain Cluster", y="Abundance",
-       title= "Eukaryota Clustersize Comparison")+
+  labs(x="Louvain Cluster", y="Abundance")+
   theme(legend.key.size = unit(0.65, units = "cm"), legend.position="none")+ #Legend size adjustments removing legend here
   scale_x_continuous(breaks = c(0,2:13))+
   scale_y_continuous(limits = c(0,max(euk_cluster$Abundance*1.2)))+
@@ -108,7 +107,9 @@ gg_euk_clustersize <- ggplot(euk_cluster,
 # Show it
 gg_euk_clustersize
 # Save to plot_path
-ggsave(filename="ClusterSize.png", plot=gg_euk_clustersize, path=paste(plot_path,"/00_Appendix//02_Top/Eukaryota",sep=""))
+ggsave(filename="ClusterSize.png", plot=gg_euk_clustersize+
+                                              labs(title= "Eukaryota Clustersize Comparison"),
+       path=paste(plot_path,"/00_Appendix/02_Top/Eukaryota",sep=""))
 
 
 
@@ -120,8 +121,7 @@ gg_family_overall <- ggplot(euk_family_top10_overall,
                                       label=paste0(round(Freq,4)*100,"%\n(",Count,")"))) + 
   geom_bar(position="dodge", stat="identity")+ # Cluster Kingdoms Barplot
   scale_fill_manual(values= colorblind_palette[0:-1])+
-  labs(x="Family",y="% of total identifies archaea ASVs",
-       title = "Eukaryota families overall")+ # Axis labels
+  labs(x="Family",y="% of total identified eukaryota ASVs")+ # Axis labels
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
   scale_y_continuous(labels = scales::label_percent(suffix=""),
                      breaks=seq(0,1,by=0.1),
@@ -132,7 +132,9 @@ gg_family_overall <- ggplot(euk_family_top10_overall,
 # Show it
 gg_family_overall
 # Save to plot_path
-ggsave(filename="Family_Overall.png", plot=gg_family_overall, path=paste(plot_path,"/02_Top/Eukaryota",sep=""))
+ggsave(filename="Family_Overall.png", plot=gg_family_overall+
+                                                labs(title = "Eukaryota families overall"),
+       path=paste(plot_path,"/02_Top/Eukaryota",sep=""))
 
 
 
@@ -162,7 +164,9 @@ gg_top_family <- ggplot(euk_family_top10,
 #Show it
 gg_top_family
 #Save to plot_path
-ggsave(filename="Family_Cluster_Percent.png", plot=gg_top_family, path=paste(plot_path,"/00_Appendix//02_Top/Eukaryota",sep=""))
+ggsave(filename="Family_Cluster_Percent.png", plot=gg_top_family+
+                                                      labs(title= "Eukaryota Families"),
+       path=paste(plot_path,"/00_Appendix//02_Top/Eukaryota",sep=""))
 
 
 
@@ -173,7 +177,9 @@ gg_top_family_numbers <- gg_top_family+
 #Show it
 gg_top_family_numbers
 #Save to plot_path
-ggsave(filename="Family_Cluster_Percent_Numbers.png", plot=gg_top_family_numbers, path=paste(plot_path,"/00_Appendix//02_Top/Eukaryota",sep=""))
+ggsave(filename="Family_Cluster_Percent_Numbers.png", plot=gg_top_family_numbers+
+                                                                labs(title= "Eukaryota Families"),
+       path=paste(plot_path,"/00_Appendix//02_Top/Eukaryota",sep=""))
 
 
 
@@ -205,11 +211,15 @@ gg_top_family_abundance <- ggplot(euk_family_top10,
 #Show it
 gg_top_family_abundance
 #Save to plot_path
-ggsave(filename="Family_Cluster_Abundance.png", plot=gg_top_family_abundance + theme(legend.position="right"), path=paste(plot_path,"/00_Appendix/02_Top/Eukaryota",sep=""))
+ggsave(filename="Family_Cluster_Abundance.png", plot=gg_top_family_abundance+
+                                                            theme(legend.position="right")+
+                                                            labs(title= "Eukaryota Families"),
+         path=paste(plot_path,"/00_Appendix/02_Top/Eukaryota",sep=""))
 
 
 
 # Combined Cluster Plots
 combined_plots <- gg_top_family_abundance | gg_top_family
-combined_plots + plot_annotation(tag_levels = 'A')
+combined_plots <- combined_plots + plot_annotation(tag_levels = 'A')
+combined_plots
 ggsave(filename="Family_Cluster_Combined.png", plot=combined_plots, path=paste(plot_path,"/02_Top/Eukaryota",sep=""))

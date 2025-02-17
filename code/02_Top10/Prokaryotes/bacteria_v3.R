@@ -53,7 +53,7 @@ bac_family_overall <- bac_family_overall %>% mutate(Freq = total_Abundance/sum(t
 bac_family_overall <- bac_family_overall %>% arrange(total_Abundance)
 
 # Top 10 Overall only
-bac_family_top10_overall <- tail(bac_family_overall,11)
+bac_family_top10_overall <- tail(bac_family_overall,10)
 bac_family_top10_overall <- bac_family_top10_overall %>% mutate(Freq = total_Abundance/sum(total_Abundance))
 
 
@@ -61,16 +61,16 @@ bac_family_top10_overall <- bac_family_top10_overall %>% mutate(Freq = total_Abu
 bac_family_top10 <- subset(nodes_bac_noUnknown_family, nodes_bac_noUnknown_family$Family %in% bac_family_top10_overall$Family)
 bac_family_top10 <- bac_family_top10 %>% group_by(Family,LouvainLabelD) %>% summarize(Abundance = sum(Abundance4y))
 bac_family_top10 <- bac_family_top10 %>% group_by(LouvainLabelD) %>% mutate(FreqInCluster = Abundance/sum(Abundance))
-bac_family_top10 <- bac_family_top10 %>% arrange(LouvainLabelD)
+bac_family_top10 <- bac_family_top10 %>% arrange(LouvainLabelD,FreqInCluster)
 bac_family_top10
 
 
 # Anteile
 sum(nodes_bac$Abundance4y)
 sum(nodes_bac_noUnknown_family$Abundance4y)
-sum(bac_family_overall$total_Abundance)
+sum(bac_family_top10_overall$total_Abundance)
 
-sum(bac_family_overall$total_Abundance)/sum(nodes_bac$Abundance4y)
+sum(bac_family_top10_overall$total_Abundance)/sum(nodes_bac$Abundance4y)
 
 
 
@@ -96,8 +96,7 @@ gg_bac_clustersize <- ggplot(bac_cluster,
   geom_vline(aes(xintercept=c(10)+0.5))+
   geom_vline(aes(xintercept=c(11)+0.5))+
   geom_vline(aes(xintercept=c(12)+0.5))+
-  labs(x="Louvain Cluster", y="Abundance",
-       title= "Bacteria Clustersize Comparison")+
+  labs(x="Louvain Cluster", y="Abundance")+
   theme(legend.key.size = unit(0.65, units = "cm"), legend.position="none")+ #Legend size adjustments removing legend here
   scale_x_continuous(breaks = c(0,2:13))+
   scale_y_continuous(limits = c(0,max(bac_cluster$Abundance*1.2)))+
@@ -108,7 +107,9 @@ gg_bac_clustersize <- ggplot(bac_cluster,
 # Show it
 gg_bac_clustersize
 # Save to plot_path
-ggsave(filename="ClusterSize.png", plot=gg_bac_clustersize, path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
+ggsave(filename="ClusterSize.png", plot=gg_bac_clustersize +
+                                            labs(title= "Bacteria Clustersize Comparison"),
+       path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
 
 
 
@@ -120,8 +121,7 @@ gg_family_overall <- ggplot(bac_family_top10_overall,
                                       label=paste0(round(Freq,4)*100,"%\n(",Count,")"))) + 
   geom_bar(position="dodge", stat="identity")+ # Cluster Kingdoms Barplot
   scale_fill_manual(values= colorblind_palette[0:-1])+
-  labs(x="Family",y="% of total identifies archaea ASVs",
-       title = "Bacteria families overall")+ # Axis labels
+  labs(x="Family",y="% of total identified bacteria ASVs")+ # Axis labels
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
   scale_y_continuous(labels = scales::label_percent(suffix=""),
                      breaks=seq(0,1,by=0.1),
@@ -132,7 +132,9 @@ gg_family_overall <- ggplot(bac_family_top10_overall,
 # Show it
 gg_family_overall
 # Save to plot_path
-ggsave(filename="Family_Overall.png", plot=gg_family_overall, path=paste(plot_path,"/02_Top/Bacteria",sep=""))
+ggsave(filename="Family_Overall.png", plot=gg_family_overall +
+                                              labs(title = "Bacteria families overall"),
+       path=paste(plot_path,"/02_Top/Bacteria",sep=""))
 
 
 
@@ -155,15 +157,16 @@ gg_top_family <- ggplot(bac_family_top10,
                         geom_vline(aes(xintercept=c(10)+0.5))+
                         geom_vline(aes(xintercept=c(11)+0.5))+
                         geom_vline(aes(xintercept=c(12)+0.5))+
-                        labs(x="Louvain Cluster", y="% of total abundance of top identified families",
-                             title= "Bacteria Families")+
+                        labs(x="Louvain Cluster", y="% of total abundance of top identified families")+
                         scale_x_continuous(breaks = c(0,2:13))+
                         scale_y_continuous(labels = scales::label_percent(suffix=""))+ #Y-Axis values (Percent)
                         scale_fill_discrete(type=colorblind_palette[0:-1])
 #Show it
 gg_top_family
 #Save to plot_path
-ggsave(filename="Family_Cluster_Percent.png", plot=gg_top_family, path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
+ggsave(filename="Family_Cluster_Percent.png", plot=gg_top_family +
+                                                      labs(title= "Bacteria Families"),
+       path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
 
 
 
@@ -174,7 +177,9 @@ gg_top_family_numbers <- gg_top_family+
 #Show it
 gg_top_family_numbers
 #Save to plot_path
-ggsave(filename="Family_Cluster_Percent_Numbers.png", plot=gg_top_family_numbers, path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
+ggsave(filename="Family_Cluster_Percent_Numbers.png", plot=gg_top_family_numbers +
+                                                              labs(title = "Bacteria families overall"),
+       path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
 
 
 
@@ -199,19 +204,22 @@ gg_top_family_abundance <- ggplot(bac_family_top10,
   geom_vline(aes(xintercept=c(10)+0.5))+
   geom_vline(aes(xintercept=c(11)+0.5))+
   geom_vline(aes(xintercept=c(12)+0.5))+
-  labs(x="Louvain Cluster", y="total abundance of top identified families",
-       title= "Bacteria Families")+
+  labs(x="Louvain Cluster", y="total abundance of top identified families")+
   theme(legend.key.size = unit(0.65, units = "cm"), legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))+
   scale_fill_discrete(type=colorblind_palette[0:-1])
 #Show it
 gg_top_family_abundance
-#Save to plot_path
-ggsave(filename="Family_Cluster_Abundance.png", plot=gg_top_family_abundance + theme(legend.position="right"), path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
+#Save to plot_path 
+ggsave(filename="Family_Cluster_Abundance.png", plot=gg_top_family_abundance +
+                                                          theme(legend.position="right")+
+                                                          labs(title= "Bacteria Families"),
+       path=paste(plot_path,"/00_Appendix/02_Top/Bacteria",sep=""))
 
 
 
 # Combined Cluster Plots
 combined_plots <- gg_top_family_abundance | gg_top_family
-combined_plots + plot_annotation(tag_levels = 'A')
+combined_plots <- combined_plots + plot_annotation(tag_levels = 'A')
+combined_plots
 ggsave(filename="Family_Cluster_Combined.png", plot=combined_plots, path=paste(plot_path,"/02_Top/Bacteria",sep=""))
