@@ -19,7 +19,7 @@ nodes <- read.csv("ferret_tables_Pruned_CCMN.csv_1 default node.csv", header=TRU
 #Replace Environment_Condition with NA
 nodes[nodes == "Environment_Condition"] <- NA
 
-nodes_euk <- subset(nodes,nodes$Kingdom == "Eukaryota")
+nodes_bacteria <- subset(nodes,nodes$Kingdom == "Bacteria")
 
 
 # Calculation of different alpha diversities per cluster
@@ -27,16 +27,16 @@ chao1 <- c()
 shannon <- c()
 simpson <- c()
 
-for (cluster in sort(unique(nodes_euk$LouvainLabelD))){
+for (cluster in sort(unique(nodes_bacteria$LouvainLabelD))){
   if(cluster == 0){
     cluster_fix = 1
   }else cluster_fix = cluster
   #Chao1 - Richness
-  chao1 <- c(chao1,chao1(nodes_euk[which(nodes_euk$LouvainLabelD == cluster),1],taxa.row=TRUE))
+  chao1 <- c(chao1,chao1(nodes_bacteria[which(nodes_bacteria$LouvainLabelD == cluster),1],taxa.row=TRUE))
   #Shannon Entropy
-  shannon <- c(shannon,diversity(nodes_euk[which(nodes_euk$LouvainLabelD == cluster),1],index="shannon"))
+  shannon <- c(shannon,diversity(nodes_bacteria[which(nodes_bacteria$LouvainLabelD == cluster),1],index="shannon"))
   #Simpson-Index
-  simpson <- c(simpson,diversity(nodes_euk[which(nodes_euk$LouvainLabelD == cluster),1],index="simpson"))
+  simpson <- c(simpson,diversity(nodes_bacteria[which(nodes_bacteria$LouvainLabelD == cluster),1],index="simpson"))
   
   cat("Done with calculating the alpha diversities of Cluster", cluster, "\n",sep="")
 }
@@ -44,8 +44,8 @@ for (cluster in sort(unique(nodes_euk$LouvainLabelD))){
 
 
 # Put all data into a single dataframe
-ASV_count <- nodes_euk %>% group_by(LouvainLabelD) %>% summarise(ASVs = n_distinct(Sequence)) %>% select(ASVs)
-df_diversity <- nodes_euk %>% group_by(LouvainLabelD) %>% summarise(Abundance = sum(Abundance4y)) %>%
+ASV_count <- nodes_bacteria %>% group_by(LouvainLabelD) %>% summarise(ASVs = n_distinct(Sequence)) %>% select(ASVs)
+df_diversity <- nodes_bacteria %>% group_by(LouvainLabelD) %>% summarise(Abundance = sum(Abundance4y)) %>%
   select(Abundance) %>% mutate(Abundance = Abundance)
 df_diversity <- df_diversity %>% mutate(ASV_count)
 df_diversity <- df_diversity %>% mutate(Chao1 = chao1)
@@ -67,12 +67,14 @@ gg_asv_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversit
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_asv_per_cluster
+gg_asv_per_cluster+
+  labs(title="Bacteria")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
 ggsave(filename="ASV_Count.png", plot=gg_asv_per_cluster+
-                                        labs(title="Eukaryotes")+
+                                        labs(title="Bacteria")+
                                         geom_text(vjust=-0.5,size=5),
-       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Eukaryotes/"))
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/Bacteria"))
 
 
 
@@ -87,12 +89,14 @@ gg_chao_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversi
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_chao_per_cluster
+gg_chao_per_cluster+
+  labs(title="Bacteria")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
 ggsave(filename="Chao1.png", plot=gg_chao_per_cluster+
-                                      labs(title="Eukaryotes")+
+                                      labs(title="Bacteria")+
                                       geom_text(vjust=-0.5,size=5),
-       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Eukaryotes/"))
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/Bacteria"))
 
 
 
@@ -107,12 +111,14 @@ gg_shannon_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_dive
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_shannon_per_cluster
+gg_shannon_per_cluster+
+  labs(title="Bacteria")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
 ggsave(filename="Shannon.png", plot=gg_shannon_per_cluster+
-                                        labs(title="Eukaryotes")+
+                                        labs(title="Bacteria")+
                                         geom_text(vjust=-0.5,size=5),
-       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Eukaryotes/"))
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/Bacteria"))
 
 
 
@@ -127,13 +133,14 @@ gg_simpson_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_dive
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_simpson_per_cluster
+gg_simpson_per_cluster+
+  labs(title="Bacteria")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
 ggsave(filename="Simpson.png", plot=gg_simpson_per_cluster+
-                                        labs(title="Eukaryotes")+
+                                        labs(title="Bacteria")+
                                         geom_text(vjust=-0.5,size=5),
-       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Eukaryotes/"))
-
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/Bacteria"))
 
 
 
@@ -144,7 +151,7 @@ count_alpha_divs <- count_alpha_divs + plot_annotation(tag_levels = 'A')
 count_alpha_divs
 # Save to plot_path
 ggsave(filename="Combined_ASV_Chao.png", plot=count_alpha_divs,
-       path=paste0(plot_path,"03_Diversities/Alpha/Eukaryotes/"))
+       path=paste0(plot_path,"03_Diversities/Alpha/Prokaryotes/Bacteria"))
 
 
 
@@ -155,4 +162,4 @@ val_alpha_divs <- val_alpha_divs + plot_annotation(tag_levels = 'A')
 val_alpha_divs
 # Save to plot_path
 ggsave(filename="Combined_Shannon_Simpson.png", plot=val_alpha_divs,
-       path=paste0(plot_path,"03_Diversities/Alpha/Eukaryotes/"))
+       path=paste0(plot_path,"03_Diversities/Alpha/Prokaryotes/Bacteria"))

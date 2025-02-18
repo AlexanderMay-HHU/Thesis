@@ -42,7 +42,6 @@ cat("There are # different\n","Family:",length(unique(nodes_arc$Family)),"\n")
 head(nodes_arc_noUnknown_family)[,c("Abundance4y","Family")]
 arc_family <- nodes_arc_noUnknown_family %>% group_by(Family,LouvainLabelD) %>% summarize(Abundance = sum(Abundance4y))
 arc_family <- arc_family %>% group_by(LouvainLabelD) %>% mutate(FreqInCluster = Abundance/sum(Abundance))
-arc_family <- arc_family %>% arrange(LouvainLabelD)
 arc_family <- arc_family %>% arrange(LouvainLabelD,FreqInCluster)
 arc_family
 
@@ -51,7 +50,10 @@ arc_family
 # Families overall
 arc_family_overall <- arc_family %>% group_by(Family) %>% summarize(total_Abundance = sum(Abundance))
 arc_family_overall <- arc_family_overall %>% mutate(Freq = total_Abundance/sum(total_Abundance))
-arc_family_overall$Count <- nodes_arc_noUnknown_family %>% group_by(Family) %>% summarise(Count = n()) %>% select(Count)
+arc_family_overall <- arc_family_overall %>% mutate(Freq2 = total_Abundance/sum(nodes_arc$Abundance4y))
+
+arc_family_counts <- nodes_arc_noUnknown_family %>% group_by(Family) %>% summarize(Count = n())
+arc_family_overall <- arc_family_overall %>% left_join(arc_family_counts, by = "Family")
 arc_family_overall
 
 
@@ -59,7 +61,8 @@ arc_family_overall
 sum(nodes_arc$Abundance4y)
 sum(nodes_arc_noUnknown_family$Abundance4y)
 sum(arc_family_overall$total_Abundance)
-
+clustersize_top10 <- arc_family %>% group_by(LouvainLabelD) %>% summarize(Abundance = sum(Abundance))
+clustersize_top10
 sum(arc_family_overall$total_Abundance)/sum(nodes_arc$Abundance4y)
 
 
@@ -106,18 +109,20 @@ ggsave(filename="ClusterSize.png", plot=gg_arc_clustersize+
 # Overall
 gg_family_overall <- ggplot(arc_family_overall,
                                   aes(fill=Family,
-                                      y=Freq,
-                                      x=Family,
-                                      label=paste0(round(Freq,5)*100,"%\n(",Count$Count,")"))) + 
+                                      y=Freq2,
+                                      x=Family)) + 
   geom_bar(position="dodge", stat="identity")+ # Cluster Kingdoms Barplot
   scale_fill_manual(values= colorblind_palette[0:-1])+
   labs(x="Family",y="% of total identified archaea ASVs")+ # Axis labels
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
   scale_y_continuous(labels = scales::label_percent(suffix=""),
                      breaks=seq(0,1,by=0.1),
-                     limits = c(0,max(arc_family_overall$Freq*1.2)))+#Y-Axis values
+                     limits = c(0,max(arc_family_overall$Freq2*1.2)))+#Y-Axis values
   theme(legend.key.size = unit(0.65, units = "cm"), legend.position="none")+ #Legend size adjustments removing legend here
-  geom_text(inherit.aes = T,size = 4,position = position_dodge(0.9),vjust=-0.25) #Barplot text value
+  geom_text(label=(ifelse(arc_family_overall$Freq>=0.02,
+                          paste0(round(arc_family_overall$Freq,4)*100,"%\n(",arc_family_overall$Count,")"),
+                          paste0(round(arc_family_overall$Freq,5)*100,"%\n(",arc_family_overall$Count,")"))),
+            size = 4,position = position_dodge(0.9),vjust=-0.25) #Barplot text value
 
 # Show it
 gg_family_overall

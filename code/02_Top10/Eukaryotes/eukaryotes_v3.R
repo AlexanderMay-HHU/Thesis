@@ -69,7 +69,8 @@ euk_family_top10
 sum(nodes_euk$Abundance4y)
 sum(nodes_euk_noUnknown_family$Abundance4y)
 sum(euk_family_top10_overall$total_Abundance)
-
+clustersize_top10 <- euk_family_top10 %>% group_by(LouvainLabelD) %>% summarize(Abundance = sum(Abundance))
+clustersize_top10
 sum(euk_family_top10_overall$total_Abundance)/sum(nodes_euk$Abundance4y)
 
 

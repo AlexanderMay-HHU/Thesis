@@ -69,7 +69,8 @@ bac_family_top10
 sum(nodes_bac$Abundance4y)
 sum(nodes_bac_noUnknown_family$Abundance4y)
 sum(bac_family_top10_overall$total_Abundance)
-
+clustersize_top10 <- bac_family_top10 %>% group_by(LouvainLabelD) %>% summarize(Abundance = sum(Abundance))
+clustersize_top10
 sum(bac_family_top10_overall$total_Abundance)/sum(nodes_bac$Abundance4y)
 
 

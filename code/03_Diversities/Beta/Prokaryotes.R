@@ -26,13 +26,10 @@ rownames(abundance_of_phylum_in_cluster) <- sort(unique(nodes_prokaryotes$Louvai
 
 #Calculate the Abundance of Phylums per Cluster
 for (cluster in sort(unique(nodes_prokaryotes$LouvainLabelD))){
-  if(cluster == 0){
-    cluster_fix = 1
-  }else cluster_fix = cluster
   for (phylum in unique(nodes_prokaryotes$Phylum)){
     #Abundance of Phylum (skip NA phylum)
     if(!is.na(phylum)){
-      abundance_of_phylum_in_cluster[cluster_fix,phylum] <- sum(nodes_prokaryotes[nodes_prokaryotes$LouvainLabelD == cluster &
+      abundance_of_phylum_in_cluster[ifelse(cluster==0,1,cluster),phylum] <- sum(nodes_prokaryotes[nodes_prokaryotes$LouvainLabelD == cluster &
                                                                             nodes_prokaryotes$Phylum == phylum,1],na.rm = TRUE)
       cat("Done with calculating the sum of Phylum (", phylum,") from Cluster", cluster, "\n",sep="")
     }else{
@@ -40,6 +37,7 @@ for (cluster in sort(unique(nodes_prokaryotes$LouvainLabelD))){
     }
   }
 }
+
 
 
 

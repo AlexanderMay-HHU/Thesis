@@ -3,10 +3,11 @@ library(ggplot2)  #Used to plot
 library(dplyr)
 library(vegan)    #Used for Shannon & Simpson Diversities
 library(fossil)   #used for Chao1 - Richness
+library(patchwork)
 
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/03_Diversities/Alpha/Prokaryotes/"
+plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
 colorblind_gradient_palette <- c("#000000","#df536b","#61d04f","#2297e6",
                                  "#9928e5","#ee9ced","#e69f00","#8ee6ff",
                                  "#009e73","#f0e442","#0072b2","#d55e00",
@@ -61,15 +62,19 @@ gg_asv_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversit
                                                y=ASVs,
                                                label=ASVs)) + 
   geom_bar(stat="identity",fill=colorblind_gradient_palette)+
-  labs(x="Louvain Cluster",y="ASVs",title="Archaea + Bacteria (Prokaryotes)")+
-  geom_text(vjust=-0.5,size=5)+
+  labs(x="Louvain Cluster",y="ASVs")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_asv_per_cluster
+gg_asv_per_cluster+
+  labs(title="Archaea + Bacteria (Prokaryotes)")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
-ggsave(filename="ASV_Count.png", plot=gg_asv_per_cluster, path=plot_path)
+ggsave(filename="ASV_Count.png", plot=gg_asv_per_cluster+
+                                        labs(title="Archaea + Bacteria (Prokaryotes)")+
+                                        geom_text(vjust=-0.5,size=5),
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/"))
 
 
 
@@ -79,15 +84,19 @@ gg_chao_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversi
                                                 y=Chao1,
                                                 label=Chao1)) + 
   geom_bar(stat="identity", fill=colorblind_gradient_palette)+
-  labs(x="Louvain Cluster",y="Chao1 - Richness",title="Archaea + Bacteria (Prokaryotes)")+
-  geom_text(vjust=-0.5,size=5)+
+  labs(x="Louvain Cluster",y="Chao1 - Richness")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_chao_per_cluster
+gg_chao_per_cluster+
+  labs(title="Archaea + Bacteria (Prokaryotes)")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
-ggsave(filename="Chao1.png", plot=gg_chao_per_cluster, path=plot_path)
+ggsave(filename="Chao1.png", plot=gg_chao_per_cluster+
+                                      labs(title="Archaea + Bacteria (Prokaryotes)")+
+                                      geom_text(vjust=-0.5,size=5),
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/"))
 
 
 
@@ -97,15 +106,19 @@ gg_shannon_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_dive
                                                    y=Shannon,
                                                    label=round(Shannon,2))) + 
   geom_bar(stat="identity", fill=colorblind_gradient_palette)+
-  labs(x="Louvain Cluster",y="Shannon-Entropy",title="Archaea + Bacteria (Prokaryotes)")+
-  geom_text(vjust=-0.5,size=5)+
+  labs(x="Louvain Cluster",y="Shannon-Entropy")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_shannon_per_cluster
+gg_shannon_per_cluster+
+  labs(title="Archaea + Bacteria (Prokaryotes)")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
-ggsave(filename="Shannon.png", plot=gg_shannon_per_cluster, path=plot_path)
+ggsave(filename="Shannon.png", plot=gg_shannon_per_cluster+
+                                        labs(title="Archaea + Bacteria (Prokaryotes)")+
+                                        geom_text(vjust=-0.5,size=5),
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/"))
 
 
 
@@ -115,12 +128,38 @@ gg_simpson_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_dive
                                                    y=Simpson,
                                                    label=round(Simpson,2))) + 
   geom_bar(stat="identity", fill=colorblind_gradient_palette)+
-  labs(x="Louvain Cluster",y="Simpson-Index",title="Archaea + Bacteria (Prokaryotes)")+
-  geom_text(vjust=-0.5,size=5)+
+  labs(x="Louvain Cluster",y="Simpson-Index")+
   theme(legend.position="none")+
   scale_x_continuous(breaks = c(0,2:13))
 
 #Show it
-gg_simpson_per_cluster
+gg_simpson_per_cluster+
+  labs(title="Archaea + Bacteria (Prokaryotes)")+
+  geom_text(vjust=-0.5,size=5)
 #Save to plot_path
-ggsave(filename="Simpson.png", plot=gg_simpson_per_cluster, path=plot_path)
+ggsave(filename="Simpson.png", plot=gg_simpson_per_cluster+
+                                        labs(title="Archaea + Bacteria (Prokaryotes)")+
+                                        geom_text(vjust=-0.5,size=5),
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Alpha/Prokaryotes/"))
+
+
+
+# Combined ASV Count & Chao Plot
+count_alpha_divs <- (gg_asv_per_cluster+geom_text(vjust=-0.5,size=3.5) | gg_chao_per_cluster+geom_text(vjust=-0.5,size=3.5))
+count_alpha_divs <- count_alpha_divs + plot_annotation(tag_levels = 'A')
+# Show it
+count_alpha_divs
+# Save to plot_path
+ggsave(filename="Combined_ASV_Chao.png", plot=count_alpha_divs,
+       path=paste0(plot_path,"03_Diversities/Alpha/Prokaryotes/"))
+
+
+
+# Combined Shannon Entropy & Simpson Index
+val_alpha_divs <- (gg_shannon_per_cluster+geom_text(vjust=-0.5,size=3.5) | gg_simpson_per_cluster+geom_text(vjust=-0.5,size=3.5))
+val_alpha_divs <- val_alpha_divs + plot_annotation(tag_levels = 'A')
+# Show it
+val_alpha_divs
+# Save to plot_path
+ggsave(filename="Combined_Shannon_Simpson.png", plot=val_alpha_divs,
+       path=paste0(plot_path,"03_Diversities/Alpha/Prokaryotes/"))
