@@ -15,22 +15,22 @@ nodes <- read.csv("ferret_tables_Pruned_CCMN.csv_1 default node.csv", header=TRU
 #Replace Environment_Condition with NA
 nodes[nodes == "Environment_Condition"] <- NA
 
-nodes_prokaryotes <- subset(nodes,nodes$Kingdom == "Bacteria" | nodes$Kingdom == "Archaea")
+nodes_archaea <- subset(nodes,nodes$Kingdom == "Archaea")
 
 
 ## Make Diversity dataframe
-abundance_of_phylum_in_cluster <- data.frame(matrix(ncol=length(unique(nodes_prokaryotes$Phylum)),nrow=length(unique(nodes_prokaryotes$LouvainLabelD))))
-colnames(abundance_of_phylum_in_cluster) <- unique(nodes_prokaryotes$Phylum)
-rownames(abundance_of_phylum_in_cluster) <- sort(unique(nodes_prokaryotes$LouvainLabelD))
+abundance_of_phylum_in_cluster <- data.frame(matrix(ncol=length(unique(nodes_archaea$Phylum)),nrow=length(unique(nodes_archaea$LouvainLabelD))))
+colnames(abundance_of_phylum_in_cluster) <- unique(nodes_archaea$Phylum)
+rownames(abundance_of_phylum_in_cluster) <- sort(unique(nodes_archaea$LouvainLabelD))
 
 
 #Calculate the Abundance of Phylums per Cluster
-for (cluster in sort(unique(nodes_prokaryotes$LouvainLabelD))){
-  for (phylum in unique(nodes_prokaryotes$Phylum)){
+for (cluster in sort(unique(nodes_archaea$LouvainLabelD))){
+  for (phylum in unique(nodes_archaea$Phylum)){
     #Abundance of Phylum (skip NA phylum)
     if(!is.na(phylum)){
-      abundance_of_phylum_in_cluster[ifelse(cluster==0,1,cluster),phylum] <- sum(nodes_prokaryotes[nodes_prokaryotes$LouvainLabelD == cluster &
-                                                                            nodes_prokaryotes$Phylum == phylum,1],na.rm = TRUE)
+      abundance_of_phylum_in_cluster[ifelse(cluster==0,1,cluster),phylum] <- sum(nodes_archaea[nodes_archaea$LouvainLabelD == cluster &
+                                                                            nodes_archaea$Phylum == phylum,1],na.rm = TRUE)
       cat("Done with calculating the sum of Phylum (", phylum,") from Cluster", cluster, "\n",sep="")
     }else{
       next
@@ -51,6 +51,7 @@ bray_lower <- bray_lower %>% as.data.frame()
 bray_curtis_dist <- bray_curtis_dist %>% as.data.frame()
 
 
+
 ## Generate Heatmaps
 # Full
 heatmap_full <- ggplot(bray_curtis_dist, aes(x = Var2,
@@ -63,7 +64,7 @@ heatmap_full <- ggplot(bray_curtis_dist, aes(x = Var2,
                   geom_text(color = ifelse(bray_curtis_dist$Freq<=0.2 | bray_curtis_dist$Freq>=0.75 ,"white","black"), size = 4) + # Add text labels
                   guides(fill = guide_colorbar(title="", barwidth=1.5 , barheight=35))+ #Adjust Legend Height & Width
                   scale_fill_gradientn(colours = colorblind_gradient_palette,breaks=c(seq(0,1,0.1)))+ # Set color gradient
-                  labs(x = "Cluster", y = "Cluster", title = "Archaea + Bacteria (Prokaryotes)") + # Labels
+                  labs(x = "Cluster", y = "Cluster", title = "Archaea") + # Labels
                   theme(axis.text.x = element_text(angle = 0, hjust = 1),
                     panel.background = element_blank())# Rotate x-axis labels and remove plot background
 
@@ -80,7 +81,7 @@ heatmap_lower <- ggplot(bray_lower, aes(x = Var2,
                   geom_text(color = ifelse(bray_lower$Freq<=0.2 | bray_lower$Freq>=0.75 ,"white","black"), size = 4) + # Add text labels
                   guides(fill = guide_colorbar(title="", barwidth=1.5 , barheight=35))+ #Adjust Legend Height & Width
                   scale_fill_gradientn(colours = colorblind_gradient_palette,breaks=c(seq(0,1,0.1)))+ # Set color gradient
-                  labs(x = "Cluster", y = "Cluster", title = "Archaea + Bacteria (Prokaryotes)") + # Labels
+                  labs(x = "Cluster", y = "Cluster", title = "Archaea") + # Labels
                   theme(axis.text.x = element_text(angle = 0, hjust = 1),
                     panel.background = element_blank())# Rotate x-axis labels and remove plot background
 
@@ -90,5 +91,5 @@ heatmap_full
 heatmap_lower
 
 # Save it to plot_path
-ggsave(filename="Bray_Curtis_Full.png", plot=heatmap_full, path=paste0(plot_path,"00_Appendix/03_Diversities/Beta/Prokaryotes/"))
-ggsave(filename="Bray_Curtis_Lower.png", plot=heatmap_lower, path=paste0(plot_path,"00_Appendix/03_Diversities/Beta/Prokaryotes/"))
+ggsave(filename="Bray_Curtis_Full.png", plot=heatmap_full, path=paste0(plot_path,"03_Diversities/Beta/Prokaryotes/Archaea"))
+ggsave(filename="Bray_Curtis_Lower.png", plot=heatmap_lower, path=paste0(plot_path,"00_Appendix/03_Diversities/Beta/Prokaryotes/Archaea"))

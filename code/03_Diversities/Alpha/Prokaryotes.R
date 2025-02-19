@@ -55,6 +55,10 @@ df_diversity <- df_diversity %>% mutate(Color = colorblind_gradient_palette)
 df_diversity <- data.frame(df_diversity)
 rownames(df_diversity) <- c(0,2:13)
 
+# Correlation
+print(paste0("Korrelation [Anzahl-Shannon]: ", round(cor(df_diversity$Chao1,df_diversity$Shannon,method = "pearson"),3)))
+print(paste0("Korrelation [Anzahl-Simpson]: ", round(cor(df_diversity$Chao1,df_diversity$Simpson,method = "pearson"),3)))
+
 
 ## Generate Barplots
 #Number of ASvs

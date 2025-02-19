@@ -5,7 +5,7 @@ library(ggplot2)
 
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/03_Diversities/Beta/Eukaryotes/"
+plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
 colorblind_gradient_palette <- c("#3300AA","#FFFFBF","#AA0033")
 
   
@@ -51,6 +51,7 @@ bray_lower <- bray_lower %>% as.data.frame()
 bray_curtis_dist <- bray_curtis_dist %>% as.data.frame()
 
 
+
 ## Generate Heatmaps
 # Full
 heatmap_full <- ggplot(bray_curtis_dist, aes(x = Var2,
@@ -90,5 +91,5 @@ heatmap_full
 heatmap_lower
 
 # Save it to plot_path
-ggsave(filename="Bray_Curtis_Full.png", plot=heatmap_full, path=plot_path)
-ggsave(filename="Bray_Curtis_Lower.png", plot=heatmap_lower, path=plot_path)
+ggsave(filename="Bray_Curtis_Full.png", plot=heatmap_full, path=paste0(plot_path,"03_Diversities/Beta/Eukaryotes/"))
+ggsave(filename="Bray_Curtis_Lower.png", plot=heatmap_lower, path=paste0(plot_path,"00_Appendix/03_Diversities/Beta/Eukaryotes/"))
