@@ -114,15 +114,18 @@ colnames(tot_bray_curtis_dist) <- c("From_Clu","To_Clu","Freq")
 
 
 # Comparison of bray curtis dissimilarities
-bray_Ø_arc <- arc_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_Arc" = (sum(Freq)/13))
-bray_Ø_bac <- bac_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_Bac" = (sum(Freq)/13))
-bray_Ø_euk <- euk_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_Euk" = (sum(Freq)/13))
-bray_Ø_tot <- tot_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_tot" = (sum(Freq)/13))
+bray_Ø_arc <- arc_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_Arc" = round(sum(Freq)/12,4))
+bray_Ø_bac <- bac_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_Bac" = round(sum(Freq)/12,4))
+bray_Ø_euk <- euk_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_Euk" = round(sum(Freq)/12,4))
+bray_Ø_tot <- tot_bray_curtis_dist %>% group_by(From_Clu) %>% summarise("Div_tot" = round(sum(Freq)/12,4))
 
 bray_Ø <- bray_Ø_arc
 bray_Ø <- bray_Ø %>% left_join(bray_Ø_bac, by = "From_Clu")
 bray_Ø <- bray_Ø %>% left_join(bray_Ø_euk, by = "From_Clu")
 bray_Ø
+summary(bray_Ø$Div_Arc)
+summary(bray_Ø$Div_Bac)
+summary(bray_Ø$Div_Euk)
 
 
 bray_Ø_plottable <- as.data.frame(matrix(nrow=39,ncol=0))
@@ -131,6 +134,7 @@ bray_Ø_plottable$Kingdom <- c(rep("Archaea",13),rep("Bacteria",13),rep("Eukaryo
 bray_Ø_plottable$Bray_Curtis <- c(bray_Ø_arc$Div_Arc,bray_Ø_bac$Div_Bac,bray_Ø_euk$Div_Euk)
 
 
+#summary(euk_bray_curtis_dist[euk_bray_curtis_dist$From_Clu == 9 & !(euk_bray_curtis_dist$To_Clu == 9),3])
 
 
 ## PLOTS
@@ -211,12 +215,12 @@ gg_bray_tot_per_cluster <- ggplot(bray_Ø_tot, aes(x=From_Clu,
 
 #Show it
 gg_bray_tot_per_cluster+
-  labs(title="Overall")+
+  labs(title="Cluster Comparison Overall")+
   geom_text(vjust=-0.5,size=5)
 
 #Save to plot_path
-ggsave(filename="Overall.png", plot=gg_bray_euk_per_cluster+
-         labs(title="Overall")+
+ggsave(filename="Comparison_Cluster_Overall.png", plot=gg_bray_euk_per_cluster+
+         labs(title="Cluster Comparison Overall")+
          geom_text(vjust=-0.5,size=5),
        path=paste0(plot_path,"00_Appendix/03_Diversities/Beta/"))
 
@@ -248,11 +252,36 @@ gg_bray_per_cluster <- ggplot(bray_Ø_plottable, aes(x=Cluster,
 
 #Show it
 gg_bray_per_cluster+
-  labs(title="All Kingdoms")+
+  labs(title="Comparison of Clusters by Kingdom")+
   geom_text(inherit.aes = T,size = 2.5,position = position_dodge(0.9),vjust=-0.5)
 
 #Save to plot_path
-ggsave(filename="Comparison.png", plot=gg_bray_per_cluster+
-         labs(title="All Kingdoms")+
+ggsave(filename="Comparison_Cluster_Kingdom.png", plot=gg_bray_per_cluster+
+         labs(title="Comparison of Clusters by Kingdom")+
          geom_text(inherit.aes = T,size = 2.5,position = position_dodge(0.9),vjust=-0.5),
        path=paste0(plot_path,"00_Appendix/03_Diversities/Beta"))
+
+
+
+
+
+# Ø Bray-Curtis Beta Dissimilarity by kingdoms
+gg_bray_violin <- ggplot(bray_Ø_plottable, aes(x=Kingdom,
+                                                y=Bray_Curtis,
+                                                fill=Kingdom)) + 
+  geom_violin()+
+  geom_boxplot(width=0.1, color="grey", alpha=0.2)+
+  stat_summary(fun.y=mean, geom="point", shape=20, size=2, color="grey", fill="grey") +
+  labs(x="Kingdom",y= "Bray-Curtis Beta Dissimilarity")+
+  theme(legend.key.size = unit(0.65, units = "cm"),legend.position="none")+
+  scale_fill_discrete(type=c("#F8766D","#00BA38","#619CFF"))
+
+#Show it
+gg_bray_violin+
+  labs(title="Bray Curtis Beta-Dissimilarity by Kingdom across Clusters")
+
+#Save to plot_path
+ggsave(filename="Kingdom_Comparison.png", plot=gg_bray_violin+
+         labs(title="Bray Curtis Beta-Dissimilarity by Kingdom across Clusters"),
+       path=paste0(plot_path,"00_Appendix/03_Diversities/Beta"))
+

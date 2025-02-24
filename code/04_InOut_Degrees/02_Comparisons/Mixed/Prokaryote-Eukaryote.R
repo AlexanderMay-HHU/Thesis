@@ -84,9 +84,9 @@ dodge_number
 
 #Save to plot_path
 ggsave(filename="Prokaryote-Eukaryote_Count.png", plot=dodge_number_no_values,
-       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/No_Values/Mixed/"))
-ggsave(filename="Prokaryote-Eukaryote_Count.png", plot=dodge_number,
-       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/Values/Mixed/"))
+       path=paste0(plot_path,"04_InOut_Degrees/02_Comparisons/Mixed/"))
+ggsave(filename="Prokaryote-Eukaryote_Count_values.png", plot=dodge_number,
+       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/Mixed/"))
 
 
 
@@ -106,4 +106,4 @@ stacked_percent
 
 #Save to plot_path
 ggsave(filename="Prokaryote-Eukaryote_Percent.png", plot=stacked_percent,
-       path=paste(plot_path,"/00_Appendix/04_InOut_Degrees/02_Comparisons/Values/Mixed",sep=""))
+       path=paste(plot_path,"04_InOut_Degrees/02_Comparisons/Mixed",sep=""))

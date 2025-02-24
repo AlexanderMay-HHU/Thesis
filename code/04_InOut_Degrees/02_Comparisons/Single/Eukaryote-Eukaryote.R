@@ -83,9 +83,9 @@ dodge_number
 
 #Save to plot_path
 ggsave(filename="Eukaryote-Eukaryote_Count.png", plot=dodge_number_no_values,
-       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/No_Values/Single/"))
-ggsave(filename="Eukaryote-Eukaryote_Count.png", plot=dodge_number,
-       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/Values/Single/"))
+       path=paste0(plot_path,"04_InOut_Degrees/02_Comparisons/Single/"))
+ggsave(filename="Eukaryote-Eukaryote_Count_values.png", plot=dodge_number,
+       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/Single/"))
 
 
 
@@ -106,4 +106,4 @@ stacked_percent
 
 #Save to plot_path
 ggsave(filename="Eukaryote-Eukaryote_Percent.png", plot=stacked_percent,
-       path=paste0(plot_path,"/00_Appendix/04_InOut_Degrees/02_Comparisons/Values/Single/"))
+       path=paste0(plot_path,"04_InOut_Degrees/02_Comparisons/Single/"))

@@ -1,7 +1,6 @@
 ##Loading Libraries
 library("readr")
 library("dplyr")
-#library("lubridate")
 library("openair")
 library("ggplot2")
 
@@ -31,7 +30,7 @@ names(weather_cap_bear)[names(weather_cap_bear) == "wdir"] <- "wind_dir"
 names(weather_cap_bear)[names(weather_cap_bear) == "wspd"] <- "wind_speed_kmh"
 names(weather_cap_bear)[names(weather_cap_bear) == "pres"] <- "air_pressure"
 weather_cap_bear[,"date"] <- as.Date(weather_cap_bear[,"date"]) 
-weather_cap_bear[,"wind_speed_ms"] <- round(weather_perpignan[,"wind_speed_kmh"]/3.6,2)
+weather_cap_bear[,"wind_speed_ms"] <- round(weather_cap_bear[,"wind_speed_kmh"]/3.6,2)
 
 names(weather_perpignan)[names(weather_perpignan) == "tavg"] <- "temp_avg"
 names(weather_perpignan)[names(weather_perpignan) == "tmin"] <- "temp_min"
@@ -58,18 +57,40 @@ gg_temp_perpignan <- ggplot()+
             color = "red", size=0.5, alpha = 1)+
   scale_x_date(date_breaks = "1 year",
                date_minor_breaks = "3 months",
-               limits = c(weather_perpignan[1,"date"],
-                          weather_perpignan[length(weather_perpignan$date),"date"]),
+               limits = c(as.Date("2007-08-01"),
+                          as.Date("2015-03-01")),
                expand = c(0,0.1),
-               date_labels = "%b / %Y")+
-  labs(x = "Date", y = "Temperature [°C]", title = "Perpignan")+
+               date_labels = "%m.%y")+
+  labs(x = "Date", y = "Air Temperature [°C]", title = "Perpignan")+
   theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
 gg_temp_perpignan
 
 
 #Save to plot_path
-ggsave(filename="Temperature.png", plot=gg_temp_perpignan, path=paste0(plot_path, "06_Environmental/Weather/Perpignan"))
+ggsave(filename="Temperature_min_max.png", plot=gg_temp_perpignan, path=paste0(plot_path, "00_Appendix/06_Environmental/Weather/Perpignan"))
+
+
+
+## Temperature Perpignan (temp_avg)
+gg_temp_perpignan_avg <- ggplot()+
+  geom_line(data = weather_perpignan,
+            aes(x=date,y=temp_min),
+            size=0.5, alpha = 1)+
+  scale_x_date(date_breaks = "1 year",
+               date_minor_breaks = "3 months",
+               limits = c(as.Date("2007-08-01"),
+                          as.Date("2015-03-01")),
+               expand = c(0,0.1),
+               date_labels = "%m.%y")+
+  labs(x = "Date", y = "Air Temperature [°C]", title = "Perpignan")+
+  theme(axis.text.x=element_text(angle=0, hjust=0.5))
+# Show it
+gg_temp_perpignan_avg
+
+
+#Save to plot_path
+ggsave(filename="Temperature_avg.png", plot=gg_temp_perpignan_avg, path=paste0(plot_path, "06_Environmental/Weather/Perpignan"))
 
 
 
@@ -83,32 +104,54 @@ gg_temp_cap_bear <- ggplot()+
             color = "red", size=0.5, alpha = 1)+
   scale_x_date(date_breaks = "1 year",
                date_minor_breaks = "3 months",
-               limits = c(weather_cap_bear[1,"date"],
-                          weather_cap_bear[length(weather_cap_bear$date),"date"]),
+               limits = c(as.Date("2007-08-01"),
+                          as.Date("2015-03-01")),
                expand = c(0,0.1),
-               date_labels = "%b / %Y")+
-  labs(x = "Date", y = "Temperature [°C]", title = "Cap Bear")+
+               date_labels = "%m.%y")+
+  labs(x = "Date", y = "Air Temperature [°C]", title = "Cap Bear")+
   theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
 gg_temp_cap_bear
 
 
 #Save to plot_path
-ggsave(filename="Temperature.png", plot=gg_temp_cap_bear, path=paste0(plot_path, "06_Environmental/Weather/Cap_Bear"))
+ggsave(filename="Temperature_min_max.png", plot=gg_temp_cap_bear, path=paste0(plot_path, "00_Appendix/06_Environmental/Weather/Cap_Bear"))
+
+
+
+## Temperature Perpignan (temp_avg)
+gg_temp_cap_bear_avg <- ggplot()+
+  geom_line(data = weather_perpignan,
+            aes(x=date,y=temp_min),
+            size=0.5, alpha = 1)+
+  scale_x_date(date_breaks = "1 year",
+               date_minor_breaks = "3 months",
+               limits = c(as.Date("2007-08-01"),
+                          as.Date("2015-03-01")),
+               expand = c(0,0.1),
+               date_labels = "%m.%y")+
+  labs(x = "Date", y = "Air Temperature [°C]", title = "Cap Bear")+
+  theme(axis.text.x=element_text(angle=0, hjust=0.5))
+# Show it
+gg_temp_cap_bear_avg
+
+
+#Save to plot_path
+ggsave(filename="Temperature_avg.png", plot=gg_temp_cap_bear_avg, path=paste0(plot_path, "06_Environmental/Weather/Cap_Bear"))
 
 
 
 
 ## Precipitation Perpignan
 gg_prec_perpignan <- ggplot(data = weather_perpignan,  aes(x=date,y=precipitation))+
-  geom_bar(color = "steelblue", size=0.5, alpha = 1)+
+  geom_bar(stat="identity", color = "steelblue", size=0.5, alpha = 1)+
   scale_x_date(date_breaks = "1 year",
                date_minor_breaks = "3 months",
-               limits = c(weather_perpignan[1,"date"],
-                          weather_perpignan[length(weather_perpignan$date),"date"]),
-               expand = c(0,0.1),
-               date_labels = "%b / %Y")+
-  labs(x = "Date", y = "Temperature [°C]", title = "Perpignan")+
+               limits = c(as.Date("2007-08-01"),
+                          as.Date("2015-03-01")),
+               expand = c(0,0),
+               date_labels = "%m.%y")+
+  labs(x = "Date", y = "Precipitation [mm]", title = "Perpignan")+
   theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
 gg_prec_perpignan
@@ -122,47 +165,42 @@ ggsave(filename="Precipitation.png", plot=gg_prec_perpignan, path=paste0(plot_pa
 
 ### Wind
 ## Prepare data
-wind_perpignan <- weather_perpignan[,c("date","wind_speed","wind_dir")]
-wind_cap_bear <- weather_cap_bear[,c("date","wind_speed","wind_dir")]
+wind_perpignan <- weather_perpignan[,c("date","wind_speed_ms","wind_dir")]
+wind_cap_bear <- weather_cap_bear[,c("date","wind_speed_ms","wind_dir")]
 
 ## Plot it
 windplot_perpignan <-  windRose(wind_perpignan,
-                                key.header = "Wind Data for Perpignan",
-                                ws= "wind_speed",
-                                wd= "wind_dir",
-                                ws.int = 4,
-                                angle = 45,
-                                angle.scale = 15,
-                                width = 0.6,
-                                grid.line = 5)
+                                  key.header = "Wind Data for Perpignan",
+                                  ws= "wind_speed_ms",
+                                  wd= "wind_dir",
+                                  breaks=12,
+                                  ws.int = 2.777,
+                                  angle = 45,
+                                  angle.scale = 30,
+                                  width = 0.6,
+                                  grid.line = 5,
+                                  key.position="right")
 
 # Show it
   print(windplot_perpignan$plot)
   
-# Save it
-  png(paste0(plot_path, "06_Environmental/Weather/Data", "Wind_Perpignan.png"), width=5, height=5, units="in", res=300)
-  dev.off()
-  
-  
+# Save it (Needs to be saved manually)
 
+
+    
+## Plot it
 windplot_cap_bear <- windRose(wind_cap_bear,
-         ws= "wind_speed",
-         wd= "wind_dir",
-         ws.int = 4,
-         angle = 45, 
-         width = 0.6,
-         grid.line = 2.5)#,
-         #type = "season")
+                               key.header = "Wind Data for Cap Bear",
+                               ws= "wind_speed_ms",
+                               wd= "wind_dir",
+                               breaks=12,
+                               ws.int = 2.777,
+                               angle = 45,
+                               angle.scale = 30,
+                               width = 0.6,
+                               grid.line = 5,
+                               key.position="right")
+# Show it
 print(windplot_cap_bear$plot)
 
-
-
-
-
-
-
-
-
-
-
-
+# Save it (Needs to be saved manually)

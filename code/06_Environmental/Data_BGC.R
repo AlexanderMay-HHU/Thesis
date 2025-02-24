@@ -93,10 +93,10 @@ gg_temp <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "Temperature [°C]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -116,7 +116,7 @@ gg_temp_seasons <-  gg_temp +
 
 #Save to plot_path
 ggsave(filename="Temperature.png", plot=gg_temp, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Temperature.png", plot=gg_temp_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Temperature.png", plot=gg_temp_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
   
@@ -130,10 +130,10 @@ gg_sal <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "Salinity [ppt]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -153,7 +153,7 @@ gg_sal_seasons
 
 #Save to plot_path
 ggsave(filename="Salinity.png", plot=gg_sal, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Salinity.png", plot=gg_sal_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Salinity.png", plot=gg_sal_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -167,10 +167,10 @@ gg_oxy <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "Dissolved Oxygen [mg/L]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -190,7 +190,7 @@ gg_oxy_seasons
 
 #Save to plot_path
 ggsave(filename="Oxygen.png", plot=gg_oxy, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Oxygen.png", plot=gg_oxy_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Oxygen.png", plot=gg_oxy_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -204,10 +204,10 @@ gg_pH <- ggplot()+
                      color = "black", size=1.5, alpha = 1)+
           scale_x_date(date_breaks = "1 year",
                        date_minor_breaks = "3 months",
-                       limits = c(Seasons[1,"xstart"],
-                                  Seasons[length(Seasons$xend),"xend"]),
+                       limits = c(as.Date("2007-08-01"),
+                                  as.Date("2015-03-01")),
                        expand = c(0,0.1),
-                       date_labels = "%b / %Y")+
+                       date_labels = "%m.%y")+
           labs(x = "Date", y = "pH", title = "")+
           theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -227,7 +227,7 @@ gg_pH_seasons
 
 #Save to plot_path
 ggsave(filename="pH.png", plot=gg_pH, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="pH.png", plot=gg_pH_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="pH.png", plot=gg_pH_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -241,10 +241,10 @@ gg_NH4 <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "NH4 [µM]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -264,7 +264,7 @@ gg_NH4_seasons
 
 #Save to plot_path
 ggsave(filename="Ammonium.png", plot=gg_NH4, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Ammonium.png", plot=gg_NH4_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Ammonium.png", plot=gg_NH4_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -278,10 +278,10 @@ gg_NO3 <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "NO3 [µM]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -301,7 +301,7 @@ gg_NO3_seasons
 
 #Save to plot_path
 ggsave(filename="Nitrate.png", plot=gg_NO3, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Nitrate.png", plot=gg_NO3_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Nitrate.png", plot=gg_NO3_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -315,10 +315,10 @@ gg_NO2 <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "NO2 [µM]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -338,7 +338,7 @@ gg_NO2_seasons
 
 #Save to plot_path
 ggsave(filename="Nitrite.png", plot=gg_NO2, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Nitrite.png", plot=gg_NO2_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Nitrite.png", plot=gg_NO2_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -352,10 +352,10 @@ gg_PO4 <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "PO4 [µM]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -375,7 +375,7 @@ gg_PO4_seasons
 
 #Save to plot_path
 ggsave(filename="Phosphate.png", plot=gg_PO4, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Phosphate.png", plot=gg_PO4_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Phosphate.png", plot=gg_PO4_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -389,9 +389,9 @@ gg_SiOH4 <- ggplot()+
                          color = "black", size=1.5, alpha = 1)+
               scale_x_date(date_breaks = "1 year",
                            date_minor_breaks = "3 months",
-                           limits = c(Seasons[1,"xstart"],
-                                      Seasons[length(Seasons$xend),"xend"]), expand = c(0,0.1),
-                           date_labels = "%b / %Y")+
+                           limits = c(as.Date("2007-08-01"),
+                                      as.Date("2015-03-01")), expand = c(0,0.1),
+                           date_labels = "%m.%y")+
               labs(x = "Date", y = "SIOH4 [µM]", title = "")+
               theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -411,7 +411,7 @@ gg_SiOH4_seasons
 
 #Save to plot_path
 ggsave(filename="Silicate.png", plot=gg_SiOH4, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Silicate.png", plot=gg_SiOH4_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Silicate.png", plot=gg_SiOH4_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -425,10 +425,10 @@ gg_POC <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "Particulate Organic Carbon [µg/L]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -448,7 +448,7 @@ gg_POC_seasons
 
 #Save to plot_path
 ggsave(filename="Particulate_Organic_Carbon.png", plot=gg_POC, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Particulate_Organic_Carbon.png", plot=gg_POC_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Particulate_Organic_Carbon.png", plot=gg_POC_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -462,10 +462,10 @@ gg_PON <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "Particulate Organic Nitrogen [µg/L]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -485,7 +485,7 @@ gg_PON_seasons
 
 #Save to plot_path
 ggsave(filename="Particulate_Organic_Nitrogen.png", plot=gg_PON, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Particulate_Organic_Nitrogen.png", plot=gg_PON_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Particulate_Organic_Nitrogen.png", plot=gg_PON_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -499,10 +499,10 @@ gg_SPM <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "Suspended Particulate Matter [mg/L]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -522,7 +522,7 @@ gg_SPM_seasons
 
 #Save to plot_path
 ggsave(filename="Suspended_Particulate_Matter.png", plot=gg_SPM, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Suspended_Particulate_Matter.png", plot=gg_SPM_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Suspended_Particulate_Matter.png", plot=gg_SPM_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -536,10 +536,10 @@ gg_DN15 <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "δ-N15 [‰]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -559,7 +559,7 @@ gg_DN15_seasons
 
 #Save to plot_path
 ggsave(filename="δ-N15.png", plot=gg_DN15, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="δ-N15.png", plot=gg_DN15_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="δ-N15.png", plot=gg_DN15_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -573,10 +573,10 @@ gg_DC13 <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "δ-C13 [‰]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -596,7 +596,7 @@ gg_DC13_seasons
 
 #Save to plot_path
 ggsave(filename="δ-C13.png", plot=gg_DC13, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="δ-C13.png", plot=gg_DC13_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="δ-C13.png", plot=gg_DC13_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
 
@@ -610,10 +610,10 @@ gg_ChlA <- ggplot()+
                        color = "black", size=1.5, alpha = 1)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
-                         limits = c(Seasons[1,"xstart"],
-                                    Seasons[length(Seasons$xend),"xend"]),
+                         limits = c(as.Date("2007-08-01"),
+                                    as.Date("2015-03-01")),
                          expand = c(0,0.1),
-                         date_labels = "%b / %Y")+
+                         date_labels = "%m.%y")+
             labs(x = "Date", y = "Chlorophyll a [µg/L]", title = "")+
             theme(axis.text.x=element_text(angle=0, hjust=0.5))
 # Show it
@@ -633,4 +633,4 @@ gg_ChlA_seasons
 
 #Save to plot_path
 ggsave(filename="Chlorophyll_a.png", plot=gg_ChlA, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Chlorophyll_a.png", plot=gg_ChlA_seasons, path=paste0(plot_path, "06_Environmental/Seasons"))
+ggsave(filename="Chlorophyll_a.png", plot=gg_ChlA_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))

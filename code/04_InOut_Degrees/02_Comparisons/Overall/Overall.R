@@ -80,9 +80,9 @@ dodge_number
 
 #Save to plot_path
 ggsave(filename="Count.png", plot=dodge_number_no_values,
-       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/No_Values/Overall/"))
-ggsave(filename="Count.png", plot=dodge_number,
-       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/Values/Overall/"))
+       path=paste0(plot_path,"04_InOut_Degrees/02_Comparisons/Overall/"))
+ggsave(filename="Count_values.png", plot=dodge_number,
+       path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/Overall/"))
 
 
 
@@ -101,4 +101,4 @@ stacked_percent <- ggplot(in_out_deg, aes(fill=interaction_type,
 stacked_percent
 
 #Save to plot_path
-ggsave(filename="Percent.png", plot=stacked_percent, path=paste0(plot_path,"00_Appendix/04_InOut_Degrees/02_Comparisons/Values/Overall/"))
+ggsave(filename="Percent.png", plot=stacked_percent, path=paste0(plot_path,"04_InOut_Degrees/02_Comparisons/Overall/"))
