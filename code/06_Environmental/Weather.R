@@ -1,6 +1,7 @@
 ##Loading Libraries
 library("readr")
 library("dplyr")
+library("lubridate")
 library("openair")
 library("ggplot2")
 
@@ -8,6 +9,13 @@ library("ggplot2")
 #Set Working Directory
 setwd("R:/Studium/Bachelor/Thesis/data/env")
 plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
+
+season_colors <- c(
+  "Winter" = "#5EF1F2",
+  "Spring" = "#2BCE48",
+  "Summer" = "#990000",
+  "Autumn" = "#F0A3FF"
+)
 
 
 
@@ -42,6 +50,30 @@ names(weather_perpignan)[names(weather_perpignan) == "pres"] <- "air_pressure"
 weather_perpignan[,"date"] <- as.Date(weather_perpignan[,"date"]) 
 weather_perpignan[,"wind_speed_ms"] <- round(weather_perpignan[,"wind_speed_kmh"]/3.6,2)
 
+### Wind
+## Prepare data
+wind_perpignan <- weather_perpignan[,c("date","wind_speed_ms","wind_dir")]
+wind_cap_bear <- weather_cap_bear[,c("date","wind_speed_ms","wind_dir")]
+
+
+precipitation <- weather_perpignan %>% select(date,precipitation) %>%
+  mutate(Month_Start = floor_date(date, "month")) %>%
+  group_by(Month_Start) %>%
+  summarise(Monthly_Precipitation = sum(precipitation, na.rm = TRUE)) %>%
+  mutate(
+    Month = month(Month_Start),
+    Season = case_when(
+      Month %in% c(12, 1, 2) ~ "Winter",
+      Month %in% c(3, 4, 5) ~ "Spring",
+      Month %in% c(6, 7, 8) ~ "Summer",
+      Month %in% c(9, 10, 11) ~ "Autumn",
+      TRUE ~ "Other"
+    )
+  )
+
+
+
+# Generate the plot
 
 
 #### PLOTTING
@@ -143,16 +175,25 @@ ggsave(filename="Temperature_avg.png", plot=gg_temp_cap_bear_avg, path=paste0(pl
 
 
 ## Precipitation Perpignan
-gg_prec_perpignan <- ggplot(data = weather_perpignan,  aes(x=date,y=precipitation))+
-  geom_bar(stat="identity", color = "steelblue", size=0.5, alpha = 1)+
-  scale_x_date(date_breaks = "1 year",
-               date_minor_breaks = "3 months",
-               limits = c(as.Date("2007-08-01"),
-                          as.Date("2015-03-01")),
-               expand = c(0,0),
-               date_labels = "%m.%y")+
-  labs(x = "Date", y = "Precipitation [mm]", title = "Perpignan")+
-  theme(axis.text.x=element_text(angle=0, hjust=0.5))
+gg_prec_perpignan <- ggplot(precipitation, aes(x = Month_Start, y = Monthly_Precipitation, fill = Season)) +
+                              geom_col(width = 20) +
+                              scale_fill_manual(values = season_colors) +
+                              labs(
+                                title = "Monthly Precipitation Colored by Season (2007-2015)",
+                                x = "Year",
+                                y = "Total Precipitation",
+                                fill = "Season"
+                              ) +
+                              scale_x_date(
+                                date_breaks = "1 year",
+                                date_labels = "%Y",
+                                limits = c(min(precipitation$Month_Start), max(precipitation$Month_Start))
+                              ) +
+                              theme_minimal() +
+                              theme(
+                                axis.text.x = element_text(angle = 45, hjust = 1),
+                                legend.position = "bottom"
+                              )
 # Show it
 gg_prec_perpignan
 
@@ -164,10 +205,6 @@ ggsave(filename="Precipitation.png", plot=gg_prec_perpignan, path=paste0(plot_pa
 
 
 ### Wind
-## Prepare data
-wind_perpignan <- weather_perpignan[,c("date","wind_speed_ms","wind_dir")]
-wind_cap_bear <- weather_cap_bear[,c("date","wind_speed_ms","wind_dir")]
-
 ## Plot it
 windplot_perpignan <-  windRose(wind_perpignan,
                                   key.header = "Wind Data for Perpignan",
@@ -183,9 +220,7 @@ windplot_perpignan <-  windRose(wind_perpignan,
 
 # Show it
   print(windplot_perpignan$plot)
-  
 # Save it (Needs to be saved manually)
-
 
     
 ## Plot it
