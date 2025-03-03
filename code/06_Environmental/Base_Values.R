@@ -6,7 +6,8 @@ library("ggplot2")
 
 #### IMPORT DATA
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Thesis/data/env")
+project_folder <- dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path)))
+setwd(paste0(project_folder,"/data/env"))
 #Sys.setlocale("LC_ALL", "English")
 
 

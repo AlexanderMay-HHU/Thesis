@@ -7,8 +7,10 @@ library("ggplot2")
 
 #### IMPORT DATA
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Thesis/data/env")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
+project_folder <- dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path)))
+plot_path <- paste0(project_folder,"/generated_plots/")
+setwd(paste0(project_folder,"/data/env"))
+
 
 season_colors <- c(
   "Winter" = "#5EF1F2",
@@ -153,8 +155,8 @@ ggsave(filename="Temperature_min_max.png", plot=gg_temp_cap_bear, path=paste0(pl
 
 ## Temperature Perpignan (temp_avg)
 gg_temp_cap_bear_avg <- ggplot()+
-  geom_line(data = weather_perpignan,
-            aes(x=date,y=temp_min),
+  geom_line(data = weather_cap_bear,
+            aes(x=date,y=temp_avg),
             size=0.5, alpha = 1)+
   scale_x_date(date_breaks = "1 year",
                date_minor_breaks = "3 months",
@@ -182,18 +184,14 @@ gg_prec_perpignan <- ggplot(precipitation, aes(x = Month_Start, y = Monthly_Prec
                                 title = "Monthly Precipitation Colored by Season (2007-2015)",
                                 x = "Year",
                                 y = "Total Precipitation",
-                                fill = "Season"
-                              ) +
+                                fill = "Season") +
                               scale_x_date(
                                 date_breaks = "1 year",
                                 date_labels = "%Y",
-                                limits = c(min(precipitation$Month_Start), max(precipitation$Month_Start))
-                              ) +
-                              theme_minimal() +
+                                limits = c(min(precipitation$Month_Start), max(precipitation$Month_Start))) +
                               theme(
                                 axis.text.x = element_text(angle = 45, hjust = 1),
-                                legend.position = "bottom"
-                              )
+                                legend.position = "bottom")
 # Show it
 gg_prec_perpignan
 

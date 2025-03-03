@@ -3,8 +3,11 @@ library(readxl)
 
 
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
+project_folder <- dirname(dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path))))
+plot_path <- paste0(project_folder,"/generated_plots/")
+setwd(paste0(project_folder,"/data"))
+
+
 colorblind_gradient_palette <- c("#3300AA","#FFFFBF","#AA0033")
 
 

@@ -5,8 +5,11 @@ library(ggplot2)
 
 
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
+project_folder <- dirname(dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path))))
+plot_path <- paste0(project_folder,"/generated_plots/")
+setwd(paste0(project_folder,"/data"))
+
+
 colorblind_gradient_palette <- c("#000000","#df536b","#61d04f","#2297e6",
                                  "#9928e5","#ee9ced","#e69f00","#8ee6ff",
                                  "#009e73","#f0e442","#0072b2","#d55e00",
@@ -236,19 +239,7 @@ gg_bray_per_cluster <- ggplot(bray_Ø_plottable, aes(x=Cluster,
   theme(legend.key.size = unit(0.65, units = "cm"))+
   scale_x_discrete(breaks = c(0,2:13))+
   scale_fill_discrete(type=c("#F8766D","#00BA38","#619CFF"))+
-  geom_vline(aes(xintercept=c(0)+0.5))+
-  geom_vline(aes(xintercept=c(1)+0.5))+
-  geom_vline(aes(xintercept=c(2)+0.5))+
-  geom_vline(aes(xintercept=c(3)+0.5))+
-  geom_vline(aes(xintercept=c(4)+0.5))+
-  geom_vline(aes(xintercept=c(5)+0.5))+
-  geom_vline(aes(xintercept=c(6)+0.5))+
-  geom_vline(aes(xintercept=c(7)+0.5))+
-  geom_vline(aes(xintercept=c(8)+0.5))+
-  geom_vline(aes(xintercept=c(9)+0.5))+
-  geom_vline(aes(xintercept=c(10)+0.5))+
-  geom_vline(aes(xintercept=c(11)+0.5))+
-  geom_vline(aes(xintercept=c(12)+0.5))
+  geom_vline(xintercept = seq(1.5, 12.5, by = 1))
 
 #Show it
 gg_bray_per_cluster+

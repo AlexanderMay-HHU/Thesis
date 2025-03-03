@@ -6,8 +6,8 @@ library("sf")
 library("rnaturalearthhires")
 
 
-
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/00_Appendix/"
+project_folder <- dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path)))
+plot_path <- paste0(project_folder,"/generated_plots/00_Appendix/")
 
 theme_set(theme_minimal())
 

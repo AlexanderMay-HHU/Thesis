@@ -3,11 +3,13 @@ library("readr")
 library("dplyr")
 library("lubridate")
 library("ggplot2")
+library("ggpmisc")
 
 #### IMPORT DATA
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Thesis/data/env")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
+project_folder <- dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path)))
+plot_path <- paste0(project_folder,"/generated_plots/")
+setwd(paste0(project_folder,"/data/env"))
 
 
 ## q[Var] = Quality flag from SOMLIT Protocol
@@ -85,12 +87,16 @@ Seasons[Seasons$Season == "Winter","Season_Color"] <- "#5EF1F2"
 ## BGC
 # Temperature
 gg_temp <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                                          aes(x=Date,y=T),
-                                          color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
+            geom_line(data = Filtered_Bio_Geochemical_Compounds,
                        aes(x=Date,y=T),
-                       color = "black", size=1.5, alpha = 1)+
+                       color = "black", size=0.6, alpha = 1)+
+            geom_point(data = Filtered_Bio_Geochemical_Compounds,
+                      aes(x=Date,y=T),
+                      color = "black", size=1, alpha = 1)+
+            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
+                        aes(x=Date,y=T),
+                        method = "lm",
+                        color="red", size=0.6, span=0.1, alpha= 0.5)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
                          limits = c(as.Date("2007-08-01"),
@@ -122,12 +128,16 @@ ggsave(filename="Temperature.png", plot=gg_temp_seasons, path=paste0(plot_path, 
   
 # Salinity
 gg_sal <- ggplot()+
+            geom_line(data = Filtered_Bio_Geochemical_Compounds,
+                       aes(x=Date,y=S),
+                       color = "black", size=0.6, alpha = 1)+
+            geom_point(data = Filtered_Bio_Geochemical_Compounds,
+                      aes(x=Date,y=S),
+                      color = "black", size=1, alpha = 1)+
             geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
                         aes(x=Date,y=S),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=S),
-                       color = "black", size=1.5, alpha = 1)+
+                        method = "lm",
+                        color="red", size=0.6, span=0.1, alpha =0.5)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
                          limits = c(as.Date("2007-08-01"),
@@ -156,15 +166,20 @@ ggsave(filename="Salinity.png", plot=gg_sal, path=paste0(plot_path, "06_Environm
 ggsave(filename="Salinity.png", plot=gg_sal_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
 
 
+class(difftime(Filtered_Bio_Geochemical_Compounds$Date[2],Filtered_Bio_Geochemical_Compounds$Date[1]))
 
 # Oxygen
 gg_oxy <- ggplot()+
+            geom_line(data = Filtered_Bio_Geochemical_Compounds,
+                       aes(x=Date,y=O),
+                       color = "black", size=0.6, alpha = 1)+
+            geom_point(data = Filtered_Bio_Geochemical_Compounds,
+                      aes(x=Date,y=O),
+                      color = "black", size=1, alpha = 1)+
             geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
                         aes(x=Date,y=O),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=O),
-                       color = "black", size=1.5, alpha = 1)+
+                        method = "lm",
+                        color="red", size=0.6, span=0.1, alpha= 0.5)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
                          limits = c(as.Date("2007-08-01"),
@@ -196,12 +211,13 @@ ggsave(filename="Oxygen.png", plot=gg_oxy_seasons, path=paste0(plot_path, "00_Ap
 
 # PH
 gg_pH <- ggplot()+
+          geom_line(data = Filtered_Bio_Geochemical_Compounds,
+                     aes(x=Date,y=PH),
+                     color = "black", size=1, alpha = 1)+
           geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
                       aes(x=Date,y=PH),
-                      color="black", size=1.2, span=0.1)+
-          geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                     aes(x=Date,y=PH),
-                     color = "black", size=1.5, alpha = 1)+
+                      method = "lm",
+                      color="red", size=0.6, span=0.1, alpha=0.5)+
           scale_x_date(date_breaks = "1 year",
                        date_minor_breaks = "3 months",
                        limits = c(as.Date("2007-08-01"),
@@ -602,12 +618,16 @@ ggsave(filename="δ-C13.png", plot=gg_DC13_seasons, path=paste0(plot_path, "00_A
 
 # ChlA (Chlorophyll a)
 gg_ChlA <- ggplot()+
+            geom_line(data = Filtered_Bio_Geochemical_Compounds,
+                       aes(x=Date,y=CHLA),
+                       color = "black", size=0.7, alpha = 1)+
+            geom_point(data = Filtered_Bio_Geochemical_Compounds,
+                      aes(x=Date,y=CHLA),
+                      color = "black", size=1, alpha = 1)+
             geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
                         aes(x=Date,y=CHLA),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=CHLA),
-                       color = "black", size=1.5, alpha = 1)+
+                        method = "lm",
+                        color="red", size=0.6, span=0.1, alpha=0.5)+
             scale_x_date(date_breaks = "1 year",
                          date_minor_breaks = "3 months",
                          limits = c(as.Date("2007-08-01"),

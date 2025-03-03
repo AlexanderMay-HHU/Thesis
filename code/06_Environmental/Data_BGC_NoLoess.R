@@ -6,8 +6,9 @@ library("ggplot2")
 
 #### IMPORT DATA
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Thesis/Data/env")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
+project_folder <- dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path)))
+plot_path <- paste0(project_folder,"/generated_plots/")
+setwd(paste0(project_folder,"/data/env"))
 
 
 ## q[Var] = Quality flag from SOMLIT Protocol
@@ -51,6 +52,11 @@ Filtered_Bio_Geochemical_Compounds <- Filtered_Bio_Geochemical_Compounds %>% fil
 Filtered_Bio_Geochemical_Compounds <- Filtered_Bio_Geochemical_Compounds %>% filter(PROF_TEXT == "S")
 
 
+# Avg of Temp, Salinity & Oxygen over timeseries
+sum(Filtered_Bio_Geochemical_Compounds$T,na.rm = T)/length(na.omit(Filtered_Bio_Geochemical_Compounds$T))
+sum(Filtered_Bio_Geochemical_Compounds$S,na.rm = T)/length(na.omit(Filtered_Bio_Geochemical_Compounds$S))
+sum(Filtered_Bio_Geochemical_Compounds$O,na.rm = T)/length(na.omit(Filtered_Bio_Geochemical_Compounds$O))
+
 
 ## Define Seasons
 Seasons <- data.frame(xstart=as.Date(NA),xend=as.Date(NA),
@@ -78,6 +84,16 @@ Seasons[Seasons$Season == "Autumn","Season_Color"] <- "#F0A3FF"
 Seasons[Seasons$Season == "Winter","Season_Color"] <- "#5EF1F2"
 
 
+Filtered_Bio_Geochemical_Compounds <- Filtered_Bio_Geochemical_Compounds %>%
+  mutate(
+    month = month(Date),
+    season = case_when(
+      month %in% 3:5 ~ "Spring",
+      month %in% 6:8 ~ "Summer",
+      month %in% 9:11 ~ "Autumn",
+      month %in% c(12,1:2) ~ "Winter",
+      TRUE ~ "Other"
+    ))
 
 
 
@@ -88,20 +104,19 @@ Seasons[Seasons$Season == "Winter","Season_Color"] <- "#5EF1F2"
 gg_temp <- ggplot()+
   geom_line(data = Filtered_Bio_Geochemical_Compounds,
             aes(x=Date,y=T),
-            color = "black", size=1, alpha = 1)+
+            color = "black", size=0.8, alpha = 1)+
   scale_x_date(date_breaks = "1 year",
                date_minor_breaks = "3 months",
                limits = c(as.Date("2007-08-01"),
                           as.Date("2015-03-01")),
                expand = c(0,0.1),
                date_labels = "%m.%y")+
-  labs(x = "Date", y = "Temperature [°C]", title = "")
+  labs(x = "Date", y = "Temperature [°C]", title = "")+
+  theme(axis.text.x=element_text(angle=0, hjust=0.5))
 
 # Show it
 gg_temp
 
-min(Seasons$xstart)
-max(Seasons$xend)
 
 # Add Season Background
 gg_temp_seasons <-  gg_temp + 

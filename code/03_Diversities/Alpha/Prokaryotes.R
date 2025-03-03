@@ -6,8 +6,11 @@ library(fossil)   #used for Chao1 - Richness
 library(patchwork)
 
 #Set Working Directory
-setwd("R:/Studium/Bachelor/Thesis/data")
-plot_path <- "R:/Studium/Bachelor/Thesis/generated_plots/"
+project_folder <- dirname(dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path))))
+plot_path <- paste0(project_folder,"/generated_plots/")
+setwd(paste0(project_folder,"/data"))
+
+
 colorblind_gradient_palette <- c("#000000","#df536b","#61d04f","#2297e6",
                                  "#9928e5","#ee9ced","#e69f00","#8ee6ff",
                                  "#009e73","#f0e442","#0072b2","#d55e00",
@@ -47,11 +50,7 @@ for (cluster in sort(unique(nodes_prokaryotes$LouvainLabelD))){
 ASV_count <- nodes_prokaryotes %>% group_by(LouvainLabelD) %>% summarise(ASVs = n_distinct(Sequence)) %>% select(ASVs)
 df_diversity <- nodes_prokaryotes %>% group_by(LouvainLabelD) %>% summarise(Abundance = sum(Abundance4y)) %>%
   select(Abundance) %>% mutate(Abundance = Abundance)
-df_diversity <- df_diversity %>% mutate(ASV_count)
-df_diversity <- df_diversity %>% mutate(Chao1 = chao1)
-df_diversity <- df_diversity %>% mutate(Shannon = shannon)
-df_diversity <- df_diversity %>% mutate(Simpson = simpson)
-df_diversity <- df_diversity %>% mutate(Color = colorblind_gradient_palette)
+df_diversity <- df_diversity %>% mutate(Cluster = as.factor(c(0,2:13)), ASV_count, Chao1 = chao1, Shannon = shannon, Simpson = simpson, Color = colorblind_gradient_palette)
 df_diversity <- data.frame(df_diversity)
 rownames(df_diversity) <- c(0,2:13)
 
@@ -62,13 +61,14 @@ print(paste0("Korrelation [Anzahl-Simpson]: ", round(cor(df_diversity$Chao1,df_d
 
 ## Generate Barplots
 #Number of ASvs
-gg_asv_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)),
+gg_asv_per_cluster <- ggplot(df_diversity, aes(x=Cluster,
                                                y=ASVs,
                                                label=ASVs)) + 
   geom_bar(stat="identity",fill=colorblind_gradient_palette)+
   labs(x="Louvain Cluster",y="ASVs")+
-  theme(legend.position="none")+
-  scale_x_continuous(breaks = c(0,2:13))
+  theme(legend.position="none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
 
 #Show it
 gg_asv_per_cluster+
@@ -84,13 +84,14 @@ ggsave(filename="ASV_Count.png", plot=gg_asv_per_cluster+
 
 
 #Chao1 - Richness
-gg_chao_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)),
+gg_chao_per_cluster <- ggplot(df_diversity, aes(x=Cluster,
                                                 y=Chao1,
                                                 label=Chao1)) + 
   geom_bar(stat="identity", fill=colorblind_gradient_palette)+
   labs(x="Louvain Cluster",y="Chao1 - Richness")+
-  theme(legend.position="none")+
-  scale_x_continuous(breaks = c(0,2:13))
+  theme(legend.position="none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
 
 #Show it
 gg_chao_per_cluster+
@@ -106,13 +107,14 @@ ggsave(filename="Chao1.png", plot=gg_chao_per_cluster+
 
 
 #Shannon Entropy
-gg_shannon_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)),
+gg_shannon_per_cluster <- ggplot(df_diversity, aes(x=Cluster,
                                                    y=Shannon,
                                                    label=round(Shannon,2))) + 
   geom_bar(stat="identity", fill=colorblind_gradient_palette)+
   labs(x="Louvain Cluster",y="Shannon-Entropy")+
-  theme(legend.position="none")+
-  scale_x_continuous(breaks = c(0,2:13))
+  theme(legend.position="none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
 
 #Show it
 gg_shannon_per_cluster+
@@ -128,13 +130,14 @@ ggsave(filename="Shannon.png", plot=gg_shannon_per_cluster+
 
 
 #Simpson-Index
-gg_simpson_per_cluster <- ggplot(df_diversity, aes(x=as.integer(rownames(df_diversity)),
+gg_simpson_per_cluster <- ggplot(df_diversity, aes(x=Cluster,
                                                    y=Simpson,
                                                    label=round(Simpson,2))) + 
   geom_bar(stat="identity", fill=colorblind_gradient_palette)+
   labs(x="Louvain Cluster",y="Simpson-Index")+
-  theme(legend.position="none")+
-  scale_x_continuous(breaks = c(0,2:13))
+  theme(legend.position="none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
 
 #Show it
 gg_simpson_per_cluster+

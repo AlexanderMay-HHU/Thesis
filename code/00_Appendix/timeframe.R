@@ -2,13 +2,16 @@ library(dplyr)
 library(readxl)
 
 
-abundance_euk <- read_excel("R:/Studium/Bachelor/Thesis/data/Abundance_Taxa.xlsx", 
+project_folder <- dirname(dirname(dirname(rstudioapi::getActiveDocumentContext()$path)))
+paste0(project_folder,"")
+
+abundance_euk <- read_excel(paste0(project_folder,"/data/Abundance_Taxa.xlsx"), 
                             sheet = "Eukaryotic phytoplankton")
 
-abundance_arc <- read_excel("R:/Studium/Bachelor/Thesis/data/Abundance_Taxa.xlsx", 
+abundance_arc <- read_excel(paste0(project_folder,"/data/Abundance_Taxa.xlsx"), 
                             sheet = "Archaea")
 
-abundance_bac <- read_excel("R:/Studium/Bachelor/Thesis/data/Abundance_Taxa.xlsx", 
+abundance_bac <- read_excel(paste0(project_folder,"/data/Abundance_Taxa.xlsx"), 
                             sheet = "Bacteria")
 
 
@@ -31,4 +34,4 @@ min(all_dates)
 max(all_dates)
 
 #Save Dates
-write.csv(all_dates, file="R:/Studium/Bachelor/Thesis/data/env/date_list.csv")
+write.csv(all_dates, file=paste0(project_folder,"/data/env/date_list.csv"))
