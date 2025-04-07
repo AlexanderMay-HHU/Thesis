@@ -1,9 +1,9 @@
 ##Loading Libraries
-library("readr")
-library("dplyr")
-library("lubridate")
-library("ggplot2")
-library("ggpmisc")
+library(readr)
+library(dplyr)
+library(zoo)
+library(ggplot2)
+library(patchwork)
 
 #### IMPORT DATA
 #Set Working Directory
@@ -28,629 +28,251 @@ setwd(paste0(project_folder,"/data/env"))
 
 
 ### Bio-Geochemical Compounds
-Bio_Geochemical_Compounds <- read_delim("Bio_Geochemical_Compounds.csv", 
+bgc <- read_delim("Bio_Geochemical_Compounds.csv", 
                                         delim = ";", escape_double = FALSE, comment = "//", 
                                         trim_ws = TRUE, skip = 2,na = "999999")
-# Rename french to english and "un-capslock" column variable names
-names(Bio_Geochemical_Compounds)[names(Bio_Geochemical_Compounds) == "DATE"] <- "Date"
-names(Bio_Geochemical_Compounds)[names(Bio_Geochemical_Compounds) == "HEURE"] <- "Time"
-names(Bio_Geochemical_Compounds)[names(Bio_Geochemical_Compounds) == "COEF_MAREE"] <- "Coefficient_Tide"
-names(Bio_Geochemical_Compounds)[names(Bio_Geochemical_Compounds) == "MAREE"] <- "Tide"
-names(Bio_Geochemical_Compounds)[names(Bio_Geochemical_Compounds) == "nomSite*"] <- "Site_Name"
-names(Bio_Geochemical_Compounds)[names(Bio_Geochemical_Compounds) == "gpsLong*"] <- "gpsLong"
-names(Bio_Geochemical_Compounds)[names(Bio_Geochemical_Compounds) == "gpsLat*"] <- "gpsLat"
+daylight <- read.csv("daylength_minutes.csv")
+daylight$Date <- as.Date(daylight$Date, format = "%Y-%m-%d")
 
+# Only select Date and Data Columns of surface
+bgc_s <- bgc[bgc$PROF_TEXT == "S",] %>% select(DATE,T, S, O, PH, CHLA, NH4, NO3, NO2, PO4, SIOH4, COP, NOP)
+
+
+
+# Rename "un-capslock" column variable name for Date and use english var names
+names(bgc_s)[names(bgc_s) == "DATE"] <- "Date"
+names(bgc_s)[names(bgc_s) == "COP"] <- "POC"  #particulate organic carbon
+names(bgc_s)[names(bgc_s) == "NOP"] <- "PON"  #particulate organic nitrogen
+# Fix date column and 
+bgc_s$Date <- as.Date(bgc_s$Date, format = "%m/%d/%Y")
 
 
 #### Dataset selection
-### Highlight dataset specific definitions (Timeframe & Sampling Depth)
-df_start_date <- as.Date('2007-10-01')
-df_end_date <- as.Date('2015-01-31')
-## Get filtered Dataset
-# BGC
-Filtered_Bio_Geochemical_Compounds <- Bio_Geochemical_Compounds
-Filtered_Bio_Geochemical_Compounds <- Filtered_Bio_Geochemical_Compounds %>% filter(Date >= df_start_date & Date < df_end_date)
-Filtered_Bio_Geochemical_Compounds <- Filtered_Bio_Geochemical_Compounds %>% filter(PROF_TEXT == "S")
+### Only use specific portions of dataset (Timeframe)
+start_date <- as.Date('2007-01-01')
+end_date <- as.Date('2015-12-31')
+bgc_filtered <- with(bgc_s, bgc_s[(Date >= start_date & Date <= end_date), ])
+# Add daylight to env_data
+bgc_filtered <- bgc_filtered %>% 
+  inner_join(daylight %>% select(Date, minutes_of_daylight), by = "Date")
+# Add C:P ratio
+bgc_filtered$C_P_Ratio <- bgc_filtered$POC/bgc_filtered$PON
+
+# Count missing values per parameter
+colSums(is.na(bgc_filtered[,2:15]))
 
 
+# Fill missing values by linear interpolation
+bgc_filtered$T <- na.approx(bgc_filtered$T)
+bgc_filtered$S <- na.approx(bgc_filtered$S)
+bgc_filtered$O <- na.approx(bgc_filtered$O)
+bgc_filtered$PH <- na.approx(bgc_filtered$PH)
+bgc_filtered$NH4 <- na.approx(bgc_filtered$NH4)
+bgc_filtered$NO3 <- na.approx(bgc_filtered$NO3)
+bgc_filtered$NO2 <- na.approx(bgc_filtered$NO2)
+bgc_filtered$CHLA <- na.approx(bgc_filtered$CHLA)
+bgc_filtered$PO4 <- na.approx(bgc_filtered$PO4)
+bgc_filtered$SIOH4<- na.approx(bgc_filtered$SIOH4)
+bgc_filtered$POC <- na.approx(bgc_filtered$POC)
+bgc_filtered$PON <- na.approx(bgc_filtered$PON)
 
-## Define Seasons
-Seasons <- data.frame(xstart=as.Date(NA),xend=as.Date(NA),
-                      Season=NA,Season_Color="#000000")
-Date <- as.Date("2007-09-01")
-season_index <- 1
-while(Date <= df_end_date){
-  # Start & End Dates of season
-  Seasons[season_index,"xstart"] <- Date
-  Seasons[season_index,"xend"] <- floor_date(Date, 'month') + months(3) - 1
-  # Set new Date
-  Date = floor_date(Date, 'month') + months(3)
-  # Update Season Index
-  season_index <- season_index+1
-}
-# Set Season Name
-Seasons[month(Seasons$xstart) %in% 3:5,"Season"] <- "Spring"
-Seasons[month(Seasons$xstart) %in% 6:8,"Season"] <- "Summer"
-Seasons[month(Seasons$xstart) %in% 9:11,"Season"] <- "Autumn"
-Seasons[month(Seasons$xstart) %in% c(1:2,12),"Season"] <- "Winter"
-# Set Colors
-Seasons[Seasons$Season == "Spring","Season_Color"] <- "#2BCE48"
-Seasons[Seasons$Season == "Summer","Season_Color"] <- "#990000"
-Seasons[Seasons$Season == "Autumn","Season_Color"] <- "#F0A3FF"
-Seasons[Seasons$Season == "Winter","Season_Color"] <- "#5EF1F2"
+# Save data
+write.csv(bgc_filtered,"environmental_filtered.csv",row.names = F)
 
+
+## Summary of changes over time (Beginning in 2007 and ending in 2015 [Just data for Jan ])
+# Add Year as new col
+bgc_filtered$Year <- format(bgc_filtered$Date, "%Y")
+data_2007 <- subset(bgc_filtered, Year == 2007, select = -c(Year,Date))
+data_2008 <- subset(bgc_filtered, Year == 2008, select = -c(Year,Date))
+data_2009 <- subset(bgc_filtered, Year == 2009, select = -c(Year,Date))
+data_2010 <- subset(bgc_filtered, Year == 2010, select = -c(Year,Date))
+data_2011 <- subset(bgc_filtered, Year == 2011, select = -c(Year,Date))
+data_2012 <- subset(bgc_filtered, Year == 2012, select = -c(Year,Date))
+data_2013 <- subset(bgc_filtered, Year == 2013, select = -c(Year,Date))
+data_2014 <- subset(bgc_filtered, Year == 2014, select = -c(Year,Date))
+data_2015 <- subset(bgc_filtered, Year == 2015, select = -c(Year,Date))
+
+mean_2007 <- colMeans(data_2007, na.rm = TRUE)
+mean_2008 <- colMeans(data_2008, na.rm = TRUE)
+mean_2009 <- colMeans(data_2009, na.rm = TRUE)
+mean_2010 <- colMeans(data_2010, na.rm = TRUE)
+mean_2011 <- colMeans(data_2011, na.rm = TRUE)
+mean_2012 <- colMeans(data_2012, na.rm = TRUE)
+mean_2013 <- colMeans(data_2013, na.rm = TRUE)
+mean_2014 <- colMeans(data_2014, na.rm = TRUE)
+mean_2015 <- colMeans(data_2015, na.rm = TRUE)
+
+perc_change <- round((mean_2015 - mean_2007) / mean_2007 * 100,1)
+
+result <- data.frame(
+  variable = names(mean_2007),
+  mean_2007 = mean_2007,
+  mean_2008 = mean_2008,
+  mean_2009 = mean_2009,
+  mean_2010 = mean_2010,
+  mean_2011 = mean_2011,
+  mean_2012 = mean_2012,
+  mean_2013 = mean_2013,
+  mean_2014 = mean_2014,
+  mean_2015 = mean_2015,
+  perc_2007_to_2015 = perc_change
+)
+
+
+mean(bgc_filtered$S)
+mean(bgc_filtered$PH)
+mean(bgc_filtered$PO4)
 
 
 
 #### PLOTTING
-### Temperature Salinity Oxygen PH NH4 NO3 NO2 PO4 SiOH4 COP NOP MES dn15 dc13 ChlA
+### Temperature Salinity Oxygen PH NH4 NO3 NO2 PO4 SiOH4 POC PON ChlA
 ## BGC
-# Temperature
-gg_temp <- ggplot()+
-            geom_line(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=T),
-                       color = "black", size=0.6, alpha = 1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                      aes(x=Date,y=T),
-                      color = "black", size=1, alpha = 1)+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=T),
-                        method = "lm",
-                        color="red", size=0.6, span=0.1, alpha= 0.5)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "Temperature [°C]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-  gg_temp
-
-
-# Add Season Background
-gg_temp_seasons <-  gg_temp + 
-                      geom_rect(data = Seasons, aes(xmin = xstart,
-                                                    xmax = xend,
-                                                    ymin = -Inf,
-                                                    ymax = Inf),
-                                fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-  gg_temp_seasons
-
-
-#Save to plot_path
-ggsave(filename="Temperature.png", plot=gg_temp, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Temperature.png", plot=gg_temp_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
+plot_env <- function(env_data, variable) {
+  # Assign color based on variable
+  var_color <- case_when(
+    variable == 1 ~ "orange",
+    variable == 2 ~ "aquamarine4",
+    variable == 3 ~ "red3",
+    variable == 4 ~ "sienna",
+    variable == 5 ~ "green4",
+    variable == 6 ~ "royalblue4",
+    variable == 7 ~ "cyan",
+    variable == 8 ~ "deepskyblue2",
+    variable == 9 ~ "purple",
+    variable == 10 ~ "hotpink",
+    variable == 11 ~ "black",
+    variable == 12 ~ "navy",
+    variable == 13 ~ "yellow2"
+  )
   
-# Salinity
-gg_sal <- ggplot()+
-            geom_line(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=S),
-                       color = "black", size=0.6, alpha = 1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                      aes(x=Date,y=S),
-                      color = "black", size=1, alpha = 1)+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=S),
-                        method = "lm",
-                        color="red", size=0.6, span=0.1, alpha =0.5)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "Salinity [ppt]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_sal
-
-
-# Add Season Background
-gg_sal_seasons <-  gg_sal + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_sal_seasons
-
-
-#Save to plot_path
-ggsave(filename="Salinity.png", plot=gg_sal, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Salinity.png", plot=gg_sal_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-class(difftime(Filtered_Bio_Geochemical_Compounds$Date[2],Filtered_Bio_Geochemical_Compounds$Date[1]))
-
-# Oxygen
-gg_oxy <- ggplot()+
-            geom_line(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=O),
-                       color = "black", size=0.6, alpha = 1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                      aes(x=Date,y=O),
-                      color = "black", size=1, alpha = 1)+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=O),
-                        method = "lm",
-                        color="red", size=0.6, span=0.1, alpha= 0.5)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "Dissolved Oxygen [mg/L]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_oxy
-
-
-# Add Season Background
-gg_oxy_seasons <-  gg_oxy + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_oxy_seasons
-
-
-#Save to plot_path
-ggsave(filename="Oxygen.png", plot=gg_oxy, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Oxygen.png", plot=gg_oxy_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# PH
-gg_pH <- ggplot()+
-          geom_line(data = Filtered_Bio_Geochemical_Compounds,
-                     aes(x=Date,y=PH),
-                     color = "black", size=1, alpha = 1)+
-          geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                      aes(x=Date,y=PH),
-                      method = "lm",
-                      color="red", size=0.6, span=0.1, alpha=0.5)+
-          scale_x_date(date_breaks = "1 year",
-                       date_minor_breaks = "3 months",
-                       limits = c(as.Date("2007-08-01"),
-                                  as.Date("2015-03-01")),
-                       expand = c(0,0.1),
-                       date_labels = "%m.%y")+
-          labs(x = "Date", y = "pH", title = "")+
-          theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_pH
-
-
-# Add Season Background
-gg_pH_seasons <-  gg_pH + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_pH_seasons
-
-
-#Save to plot_path
-ggsave(filename="pH.png", plot=gg_pH, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="pH.png", plot=gg_pH_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# NH4 (Ammonium)
-gg_NH4 <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=NH4),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=NH4),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "NH4 [µM]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_NH4
-
-
-# Add Season Background
-gg_NH4_seasons <-  gg_oxy + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_NH4_seasons
-
-
-#Save to plot_path
-ggsave(filename="Ammonium.png", plot=gg_NH4, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Ammonium.png", plot=gg_NH4_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# NO3 (Nitrate)
-gg_NO3 <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=NO3),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=NO3),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "NO3 [µM]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_NO3
-
-
-# Add Season Background
-gg_NO3_seasons <-  gg_NO3 + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_NO3_seasons
-
-
-#Save to plot_path
-ggsave(filename="Nitrate.png", plot=gg_NO3, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Nitrate.png", plot=gg_NO3_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# NO2 (Nitrite)
-gg_NO2 <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=NO2),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=NO2),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "NO2 [µM]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_NO2
-
-
-# Add Season Background
-gg_NO2_seasons <-  gg_NO2 + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_NO2_seasons
-
-
-#Save to plot_path
-ggsave(filename="Nitrite.png", plot=gg_NO2, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Nitrite.png", plot=gg_NO2_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# PO4 (Phosphate)
-gg_PO4 <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=PO4),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=PO4),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "PO4 [µM]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_PO4
-
-
-# Add Season Background
-gg_PO4_seasons <-  gg_PO4 + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_PO4_seasons
-
-
-#Save to plot_path
-ggsave(filename="Phosphate.png", plot=gg_PO4, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Phosphate.png", plot=gg_PO4_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# SiOH4 (Silicate)
-gg_SiOH4 <- ggplot()+
-              geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                          aes(x=Date,y=SIOH4),
-                          color="black", size=1.2, span=0.1)+
-              geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                         aes(x=Date,y=SIOH4),
-                         color = "black", size=1.5, alpha = 1)+
-              scale_x_date(date_breaks = "1 year",
-                           date_minor_breaks = "3 months",
-                           limits = c(as.Date("2007-08-01"),
-                                      as.Date("2015-03-01")), expand = c(0,0.1),
-                           date_labels = "%m.%y")+
-              labs(x = "Date", y = "SIOH4 [µM]", title = "")+
-              theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_SiOH4
-
-
-# Add Season Background
-gg_SiOH4_seasons <-  gg_SiOH4 + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_SiOH4_seasons
-
-
-#Save to plot_path
-ggsave(filename="Silicate.png", plot=gg_SiOH4, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Silicate.png", plot=gg_SiOH4_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# COP (Particulate Organic Carbon)
-gg_POC <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=COP),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=COP),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "Particulate Organic Carbon [µg/L]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_POC
-
-
-# Add Season Background
-gg_POC_seasons <-  gg_POC + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_POC_seasons
-
-
-#Save to plot_path
-ggsave(filename="Particulate_Organic_Carbon.png", plot=gg_POC, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Particulate_Organic_Carbon.png", plot=gg_POC_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# NOP (Particulate Organic Nitrogen)
-gg_PON <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=NOP),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=NOP),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "Particulate Organic Nitrogen [µg/L]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_PON
-
-
-# Add Season Background
-gg_PON_seasons <-  gg_PON + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_PON_seasons
-
-
-#Save to plot_path
-ggsave(filename="Particulate_Organic_Nitrogen.png", plot=gg_PON, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Particulate_Organic_Nitrogen.png", plot=gg_PON_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# MES (Suspended Particulate Matter)
-gg_SPM <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=MES),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=MES),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "Suspended Particulate Matter [mg/L]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_SPM
-
-
-# Add Season Background
-gg_SPM_seasons <-  gg_SPM + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_SPM_seasons
-
-
-#Save to plot_path
-ggsave(filename="Suspended_Particulate_Matter.png", plot=gg_SPM, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Suspended_Particulate_Matter.png", plot=gg_SPM_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# DN15 (δ-N15 - Nitrogen Isotope | Used for research in Nitrogen Cycle)
-gg_DN15 <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=DN15),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=DN15),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "δ-N15 [‰]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_DN15
-
-
-# Add Season Background
-gg_DN15_seasons <-  gg_DN15 + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_DN15_seasons
-
-
-#Save to plot_path
-ggsave(filename="δ-N15.png", plot=gg_DN15, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="δ-N15.png", plot=gg_DN15_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# DC13 (δ-C13 - Carbon Isotope | Used for research in Nitrogen Cycle)
-gg_DC13 <- ggplot()+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=DC13),
-                        color="black", size=1.2, span=0.1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=DC13),
-                       color = "black", size=1.5, alpha = 1)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "δ-C13 [‰]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_DC13
-
-
-# Add Season Background
-gg_DC13_seasons <-  gg_DC13 + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_DC13_seasons
-
-
-#Save to plot_path
-ggsave(filename="δ-C13.png", plot=gg_DC13, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="δ-C13.png", plot=gg_DC13_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
-
-
-
-# ChlA (Chlorophyll a)
-gg_ChlA <- ggplot()+
-            geom_line(data = Filtered_Bio_Geochemical_Compounds,
-                       aes(x=Date,y=CHLA),
-                       color = "black", size=0.7, alpha = 1)+
-            geom_point(data = Filtered_Bio_Geochemical_Compounds,
-                      aes(x=Date,y=CHLA),
-                      color = "black", size=1, alpha = 1)+
-            geom_smooth(data = Filtered_Bio_Geochemical_Compounds,
-                        aes(x=Date,y=CHLA),
-                        method = "lm",
-                        color="red", size=0.6, span=0.1, alpha=0.5)+
-            scale_x_date(date_breaks = "1 year",
-                         date_minor_breaks = "3 months",
-                         limits = c(as.Date("2007-08-01"),
-                                    as.Date("2015-03-01")),
-                         expand = c(0,0.1),
-                         date_labels = "%m.%y")+
-            labs(x = "Date", y = "Chlorophyll a [µg/L]", title = "")+
-            theme(axis.text.x=element_text(angle=0, hjust=0.5))
-# Show it
-gg_ChlA
-
-
-# Add Season Background
-gg_ChlA_seasons <-  gg_ChlA + 
-  geom_rect(data = Seasons, aes(xmin = xstart,
-                                xmax = xend,
-                                ymin = -Inf,
-                                ymax = Inf),
-            fill = Seasons$Season_Color, alpha = 0.75)
-# Show it
-gg_ChlA_seasons
-
-
-#Save to plot_path
-ggsave(filename="Chlorophyll_a.png", plot=gg_ChlA, path=paste0(plot_path, "06_Environmental/Data"))
-ggsave(filename="Chlorophyll_a.png", plot=gg_ChlA_seasons, path=paste0(plot_path, "00_Appendix/06_Environmental/Seasons"))
+  # Assign y-axis label based on variable
+  y_label <- case_when(
+    variable == 1 ~ "T",
+    variable == 2 ~ "S",
+    variable == 3 ~ "O",
+    variable == 4 ~ "pH",
+    variable == 5 ~ "ChlA",
+    variable == 6 ~ "NH4",
+    variable == 7 ~ "NO3",
+    variable == 8 ~ "NO2",
+    variable == 9 ~ "PO4",
+    variable == 10 ~ "SIOH4",
+    variable == 11 ~ "POC",
+    variable == 12 ~ "PON",
+    variable == 13 ~ "PP"
+  )
+  
+  # Get column names
+  x_col <- names(env_data)[1]
+  y_col <- names(env_data)[variable + 1]
+  
+  # Create plot
+Plot <- ggplot(env_data, aes(x = .data[[x_col]], y = .data[[y_col]])) +
+          geom_line(color = var_color, size = 1.2, alpha = 1) +
+          geom_smooth(se = FALSE, color = "gray30", size = 1.2, alpha = 1) +
+          scale_x_date(
+            date_breaks = "1 year",
+            #date_minor_breaks = "3 months",
+            limits = c(as.Date("2007-01-01"), as.Date("2015-12-31")),
+            expand = c(0.05, 0.05),
+            date_labels = "%Y"
+          ) +
+          labs(x = "Year", y = y_label,
+               title = "Environmental Variable\n Over the Study Period (2007–2015)") +
+          theme_minimal(base_size = 20) +
+          theme(
+            axis.text.x = element_text(hjust = 0.5, color = "black", size = 16),  
+            axis.text.y = element_text(color = "black", size = 16),  
+            axis.title.x = element_text(size = 18, face = "bold", color = "black"),
+            axis.title.y = element_text(size = 18, face = "bold", color = "black"),  
+            panel.grid.major = element_line(color = "gray80", linewidth = 0.5, linetype = "solid"), 
+            panel.grid.minor = element_blank(),
+            plot.title = element_text(size = 24, face = "bold", hjust = 0.5, color = "black"),
+            legend.position = "none",
+            strip.text = element_text(size = 20, color = "black", face = "bold"),
+            plot.margin = margin(t = 5, r = 5, b = 5, l = 5)
+          )
+  print(Plot)
+  return(Plot)
+}
+
+
+plot_env_multi <- function(env_data, variables){
+  plot_list <- lapply(variables, function(var){
+    p <- plot_env(env_data, var)
+    ifelse(var == min(variables),
+      p <- p + labs(title = "Environmental Variables\n Over the Study Period (2007–2015)"),
+      p <- p + labs(title = ""))
+    if (var != variables[length(variables)]) {
+      p <- p + theme(
+        axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank()
+      )
+    }
+    return(p)
+  })
+  wrap_plots(plot_list, ncol = 1)
+}
+
+
+
+# Save single plots
+for (env_var in 1:12){
+  #Plot it
+  cur_plot <- plot_env(bgc_filtered,env_var)
+  # Get Current Plots name
+  cur_plot_name <- case_when(
+                      env_var == 1 ~ "Temperature",
+                      env_var == 2 ~ "Salinity",
+                      env_var == 3 ~ "Dissolved_Oxygen",
+                      env_var == 4 ~ "pH",
+                      env_var == 5 ~ "Chlorophyll_A",
+                      env_var == 6 ~ "NH4",
+                      env_var == 7 ~ "NO3",
+                      env_var == 8 ~ "NO2",
+                      env_var == 9 ~ "PO4",
+                      env_var == 10 ~ "SIOH4",
+                      env_var == 11 ~ "Particulate_Organic_Carbon",
+                      env_var == 12 ~ "Particulate Organic Nitrogen",
+                      env_var == 13 ~ "Photoperiod")
+  
+  #Save to plot_path
+  ggsave(filename=paste0(cur_plot_name,".pdf"), plot=cur_plot, path=paste0(plot_path, "06_Environmental/Data/Single"))
+}
+
+# Save Multiples
+# Temp, Photoperiod, Chlorophyll A and Oxygen
+multi_plot1 <- plot_env_multi(bgc_filtered, variables = c(1, 13, 5, 3))
+multi_plot1
+ggsave(filename="Temp_Photoperiod_ChlA_Oxy.pdf", plot=multi_plot1, path=paste0(plot_path, "06_Environmental/Data"), width =12, height= 10)
+
+# Ammonium, Nitrite, Nitrate, and Particulate Organic Nitrogen
+multi_plot2 <- plot_env_multi(bgc_filtered, variables = c(6, 8, 7, 12))
+multi_plot2
+ggsave(filename="Ammonium_Nitrite_Nitrate_PON.pdf", plot=multi_plot2, path=paste0(plot_path, "06_Environmental/Data"), width =12, height= 10)
+
+# Salinity, pH, Phosphate, Silicate and Particulate Organic Carbon
+multi_plot3 <- plot_env_multi(bgc_filtered, variables = c(2, 4, 9, 10, 11))
+multi_plot3
+ggsave(filename="Sal_pH_PO4_SiOH4_POC.pdf", plot=multi_plot3, path=paste0(plot_path, "06_Environmental/Data"), width =12, height= 10)
+
+
+#  Variables respective measurement unit
+'
+T [°C] - Temperature
+S [ppt] - Salinity
+O [mg/L] - Dissolved Oxygen
+pH - pH
+NH4 [µM] - Ammonium
+NO3 [µM] - Nitrite
+NO2 [µM] - Nitrate
+PO4 [µM] - Phosphate
+SiOH4 [µM] - Silicate
+POC [µg/L] - Particulate Organic Carbon
+PON [µg/L] - Particulate Organic Nitrogen
+ChlA [µg/L] - Chlorophyll A
+PP [min] - Photoperiod
+'
